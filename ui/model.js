@@ -24,7 +24,7 @@ window.SunModel = (function () {
       return { season: se, solar: E.autonomy(d, se.id, 14, true), dark: E.autonomy(d, se.id, 14, false) };
     });
     var cap = B.capex(d);
-    var lifeKwh = E.lifecycleEnergy(d);
+    var lifeKwh = E.lifecycleEnergy(d, sim.totals.gen);
     var m = {
       s: settings, d: d, sim: sim, T: sim.totals, autonomy: autonomy,
       target: autonomy.filter(function (a) { return a.season.id === d.autonomySeason; })[0],

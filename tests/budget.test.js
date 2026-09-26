@@ -113,6 +113,14 @@ TestRunner.suite('Lifecycle & context', function () {
     assert.approxEqual(SunBudget.bcHydroAnnual(12000), monthly * 12 * 1.05, 1e-6, 'inclining block + GST');
   });
 
+  TestRunner.test('optimizer and budget agree on the 25-year cost of a design', function (assert) {
+    var s = SunSettings.defaults();
+    var row = SunEngine.evaluate(s, SunBudget.costFn, 92, 5);
+    var d = SunEngine.buildDesign(s, { panels: 92, batteries: 5, inverters: 0 });
+    var lc = SunBudget.lifecycle(d, SunEngine.lifecycleEnergy(d));
+    assert.approxEqual(row.lifecycle, lc.lifecycle, 1e-6, 'same lifecycle cost, PV ageing included');
+  });
+
   TestRunner.test('optimizer returns a feasible, cost-consistent best design', function (assert) {
     var s = Object.assign(SunSettings.defaults(), { maxPanels: 100 });
     var o = SunEngine.optimize(s, SunBudget.costFn, { panelStep: 8, batteryMax: 9 });

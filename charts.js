@@ -197,7 +197,8 @@ window.SunCharts = (function () {
 
   /**
    * Heatmap: rows × cols of values, sequential single-hue ramp (low = light).
-   * opts: { rows[], cols[], value(r,c) → number|null, highlight:{r,c}, tip(r,c), onClick(r,c), rowTitle, colTitle }
+   * opts: { rows[], cols[], value(r,c) → number|null, highlight:{r,c}, marks:[{r,c,label}],
+   *         tip(r,c), onClick(r,c), rowTitle, colTitle }
    */
   var RAMP = ['#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#256abf', '#184f95', '#0d366b'];
   function heatmap(container, opts) {
@@ -226,7 +227,9 @@ window.SunCharts = (function () {
           var k = hi === lo ? 0 : Math.min(1, (v - lo) / (hi - lo));
           fill = RAMP[Math.min(RAMP.length - 1, Math.floor(k * RAMP.length))];
         }
-        var rect = el('rect', { x: x + 1, y: y + 1, width: Math.max(1, cw - 2), height: cellH - 2, rx: 2, fill: fill, class: 'cell' }, g);
+        var rect = el('rect', { x: x + 1, y: y + 1, width: Math.max(1, cw - 2), height: cellH - 2, rx: 2, fill: fill, class: 'cell',
+          'data-row': opts.rows[r], 'data-col': opts.cols[c] }, g);
+        if (v != null) rect.setAttribute('data-ok', '');
         if (opts.highlight && opts.highlight.r === r && opts.highlight.c === c) {
           rect.setAttribute('class', 'cell best');
         }
@@ -234,6 +237,11 @@ window.SunCharts = (function () {
         rect.addEventListener('mouseleave', hideTip);
         if (opts.onClick) rect.addEventListener('click', function () { opts.onClick(r, c); });
       });
+    });
+    // Numbered marks on chosen cells (drawn on top, ignore the pointer).
+    (opts.marks || []).forEach(function (m) {
+      var t = el('text', { x: PAD.left + m.c * cw + cw / 2, y: PAD.top + m.r * cellH + cellH / 2 + 4, 'text-anchor': 'middle', class: 'mark-label' }, g);
+      t.textContent = m.label;
     });
     var every = Math.ceil(opts.cols.length / 14);
     opts.cols.forEach(function (cl, c) {

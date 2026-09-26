@@ -244,9 +244,9 @@
   }
 
   /** Cost function handed to the optimizer. */
-  function costFn(d, genKwhPerYear) {
+  function costFn(d, genKwh) {
     var cap = capex(d);
-    var lc = lifecycle(d, genKwhPerYear, cap);
+    var lc = lifecycle(d, genKwh, cap);
     return { capex: cap.total, lifecycle: lc.lifecycle, annualOpex: lc.annualOpex };
   }
 
