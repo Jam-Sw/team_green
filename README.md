@@ -58,3 +58,4 @@ The optimizer puts this design within 0.3 % of the lowest 25-year lifecycle cost
 | `tools/report.js` | Generates the budget report from the engine |
 | `docs/FUNCTIONAL_REQUIREMENTS.md` | Requirements traced to code and tests |
 | `docs/BUDGET_VICTORIA.md` | Generated high-fidelity budget |
+| `research/preliminary-research.md` | Preliminary research for the Solve Energy solar challenge |
