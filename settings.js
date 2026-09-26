@@ -44,7 +44,7 @@
     { key: 'springBaseKwh', group: 'load', type: 'range', label: 'Daily use in spring', min: 10, max: 60, step: 1, def: 30, unit: 'kWh', hint: 'The challenge baseline is 30 kWh. Other seasons scale from it.' },
     { key: 'designPeakKw', group: 'load', type: 'range', label: 'Peak demand', min: 5, max: 40, step: 1, def: 15, unit: 'kW', hint: 'The most the house draws at one moment (heat pump, range…). Sets the inverter count.' },
     { key: 'includeIdle', group: 'load', type: 'bool', label: 'Count inverter standby power (65 W each)', def: true },
-    { key: 'heaterHoursWinter', group: 'load', type: 'range', label: 'Battery heaters in winter', min: 0, max: 8, step: 0.5, def: 0.5, unit: 'h/day' },
+    { key: 'heaterHoursWinter', group: 'load', type: 'range', label: 'Battery heaters (outdoor-only)', min: 0, max: 8, step: 0.5, def: 0, unit: 'h/day', hint: 'Default is 0: batteries are assumed indoors. Add runtime only for an outdoor installation.' },
 
     // ── Solar & weather ─────────────────────────────────────────────────
     { key: 'pvDerate', group: 'solar', type: 'range', label: 'Panel output after losses', min: 0.7, max: 1, step: 0.01, def: 0.88, unit: '×', hint: 'Dirt, wiring and heat. 1.00 would mean no losses.' },
@@ -81,8 +81,7 @@
     { key: 'escalationPct', group: 'finance', type: 'range', label: 'Price inflation', min: 0, max: 6, step: 0.5, def: 2, unit: '%/yr' },
     { key: 'inverterReplaceYear', group: 'finance', type: 'range', label: 'Replace inverters in year', min: 8, max: 25, step: 1, def: 13, unit: '' },
     { key: 'batteryReplaceYear', group: 'finance', type: 'range', label: 'Replace batteries in year', min: 10, max: 30, step: 1, def: 16, unit: '' },
-    { key: 'omPerYear', group: 'finance', type: 'range', label: 'Inspection & upkeep', min: 0, max: 1500, step: 50, def: 300, unit: '$/yr' },
-    { key: 'keepUtility', group: 'finance', type: 'bool', label: 'Keep BC Hydro as standby', def: true }
+    { key: 'omPerYear', group: 'finance', type: 'range', label: 'Inspection & upkeep', min: 0, max: 1500, step: 50, def: 300, unit: '$/yr' }
   ];
 
   function defaults() {

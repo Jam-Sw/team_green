@@ -63,7 +63,7 @@ window.SunModel = (function () {
         detail: d.gridboss + ' × ' + EQ.gridboss.ratedA + ' A, up to ' + EQ.gridboss.maxInverters + ' inverters each' },
       { fr: 'FR-8', ok: true, text: 'Existing 6 kW generator connected',
         detail: 'GridBOSS generator port (125 A) with a 2-wire auto-start' },
-      { fr: 'FR-9', ok: true, text: 'Nothing exported to BC Hydro',
+      { fr: 'FR-9', ok: true, text: 'Completely off-grid: no utility connection or export',
         detail: 'Surplus solar is switched off: ' + U.kwh(T.curtailed) + ' a year' },
       { fr: 'FR-10', ok: true, text: 'Generator use kept low',
         detail: U.kwh(T.gen) + ' a year over ' + T.genStarts + ' starts, ' + U.money(T.genCost) + ' in year 1' }

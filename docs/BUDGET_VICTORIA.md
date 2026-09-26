@@ -6,27 +6,37 @@
 
 | Component | Qty | Basis |
 |---|---:|---|
-| JA Solar JAM54D41-440/LB (440 W) | 92 | 40.5 kWp, 8 strings of 12/11 modules |
+| JA Solar JAM54D41-440/LB (440 W) | 92 | 40.5 kWp, 9 strings of 11/10 modules |
 | EG4 FlexBOSS21 | 2 | 15 kW design peak ÷ 12 kW battery-only; ≤ 21 kW PV each; one per GridBOSS |
 | EG4 GridBOSS | 2 | 400 A service ÷ 200 A per GridBOSS |
 | EG4 280Ah All-Weather battery | 5 | 71.7 kWh nominal, 57.3 kWh usable (20 % floor); ≥ 600 Ah per inverter |
-| 400 A fused disconnect | 1 | Service entrance (utility kept as zero-export standby) |
-| Distribution splitter | 1 | Splits the 400 A service to two GridBOSS / 200 A legs |
 | 200 A panel | 2 | One per GridBOSS load output |
 | BE7500ID 6 kW generator | 1 (existing) | Moved to GridBOSS GEN port with 2-wire auto-start |
+
+### Peak-demand basis (planning assumption)
+
+| Coincident load | Demand |
+|---|---:|
+| Heat pump / air handler | 4.5 kW |
+| Electric range / oven | 6.0 kW |
+| Clothes dryer | 4.0 kW |
+| Refrigeration, lighting and plug loads | 0.5 kW |
+| **Total planning peak** | **15.0 kW** |
+
+This is an illustrative coincident-load schedule used to size the inverter minimum, not measured demand. Replace it with a licensed electrical load calculation before construction.
 
 ### Performance (year 1, day-to-day weather, weather year 14)
 
 | Metric | Value |
 |---|---:|
-| Annual load incl. inverter idle + battery heaters | 12,945 kWh |
+| Annual load incl. inverter idle + battery heaters | 12,894 kWh |
 | PV production (DC) | 45,221 kWh |
-| Solar share of load | 94.3 % |
-| Generator energy | 815 kWh (27 starts, 136 h) |
-| Generator cost (fuel + service) | $3,847 |
-| Curtailed PV (zero export) | 32,121 kWh |
+| Solar share of load | 94.7 % |
+| Generator energy | 756 kWh (25 starts, 126 h) |
+| Generator cost (fuel + service) | $3,435 |
+| Curtailed PV (zero export) | 32,117 kWh |
 | Unserved energy | 0 kWh |
-| Winter backup, no generator (average sun / zero sun) | 9.3 days / 1.3 days |
+| Winter backup, no generator (average sun / zero sun) | 10.3 days / 1.3 days |
 | Spring backup, no generator (average sun / zero sun) | 14+ days / 1.7 days |
 | Summer backup, no generator (average sun / zero sun) | 14+ days / 1.9 days |
 | Fall backup, no generator (average sun / zero sun) | 14+ days / 1.5 days |
@@ -34,8 +44,16 @@
 ### PV string check (challenge Voc,max formula)
 
 - Voc,max = 38.9 V × (1 + (-16 − 25) × (−0.250)/100) = **42.89 V** (design low -16 °C, below Victoria's −15.0 °C record)
-- Max modules/string = ⌊550 V MPPT protection / 42.89⌋ = **12**; min = **9** (hot Vmp 28.7 V ≥ 250 V full-power window)
-- Longest string cold Voc 514.6 V < 550 V < 600 V max; strings per MPPT 2/2/1 (Isc 14.3 A vs 31/31/19 A)
+- Electrical maximum = ⌊550 V MPPT protection / 42.89⌋ = **12**; min = **9** (hot Vmp 28.7 V ≥ 250 V full-power window)
+- **Design maximum = 11 modules/string.** Eleven modules give cold Vmp 399.6 V < 440 V full-power ceiling; 12 would be 436.0 V and is not used.
+- Longest string cold Voc 471.8 V < 550 V < 600 V max; up to two parallel strings on MPPT 1/2 give Isc 2 × 14.3 = 28.6 A < 31 A (one string on the 19 A MPPT).
+
+### Preliminary one-line notes — verify in final electrical design
+
+- **GridBOSS count:** two units are retained because each GridBOSS is 200 A service equipment and the stated service is 400 A: one unit per 200 A leg. A 200 A service setting uses one unit.
+- **Battery protection:** show one 350 A Class-T fuse per inverter positive lead. A 2/0 Cu lead listed at 175 A is only a preliminary concept; the licensed electrical designer must select conductor ampacity, any parallel conductors, terminations and OCPD as one coordinated assembly.
+- **Neutral / ground:** make exactly one neutral–ground bond at the off-grid main disconnect. Keep the generator neutral floating unless the generator manufacturer and licensed installer specify a listed switched-neutral arrangement.
+- **Battery location:** batteries are assumed indoors, so battery-heater energy is 0 h/day by default. Add a heater load only for an outdoor installation.
 
 ## 2. Capital budget (City of Victoria)
 
@@ -45,14 +63,12 @@
 | Equipment | EG4 FlexBOSS21 hybrid inverter | 2 | ea | $5,500 | $11,000 | — | PST-exempt: DC→AC device in a PV system |
 | Equipment | EG4 GridBOSS microgrid interconnect | 2 | ea | $2,500 | $5,000 | — | Treated as PV-system controller (PST-exempt) — confirm with supplier |
 | Equipment | EG4 WallMount All Weather 280Ah | 5 | ea | $5,500 | $27,500 | 7 % | Batteries are not PST-exempt (PST 203) |
-| Equipment | 400 A fused service disconnect | 1 | ea | $1,500 | $1,500 | 7 % |  |
-| Equipment | Distribution splitter | 1 | ea | $4,500 | $4,500 | 7 % |  |
 | Equipment | 200 A electrical panel | 2 | ea | $1,500 | $3,000 | 7 % | One per GridBOSS / 200 A leg |
 | Equipment | BE7500ID generator (existing, reused) | 1 | ea | $0 | $0 | — | Moves to GridBOSS GEN port; manual transfer switch retired |
 | Balance of system | Module-level rapid shutdown receivers (CEC 64-218) | 46 | ea | $65 | $2,990 | — | Roof-mounted modules only |
-| Balance of system | PV wire, MC4, conduit per string | 8 | string | $180 | $1,440 | — |  |
+| Balance of system | PV wire, MC4, conduit per string | 9 | string | $180 | $1,620 | — |  |
 | Balance of system | PV DC disconnect / breakers | 2 | ea | $300 | $600 | — |  |
-| Balance of system | Inverter AC + battery cabling kit | 2 | ea | $650 | $1,300 | — |  |
+| Balance of system | Inverter AC + battery cabling / protection kit | 2 | ea | $650 | $1,300 | 7 % | Allowance includes a 350 A Class-T fuse/holder per inverter; final conductor ampacity and OCPD coordination by the electrical designer |
 | Balance of system | Battery busbar / interconnect cables | 5 | ea | $120 | $600 | 7 % |  |
 | Balance of system | Generator interconnect (inlet, 40 A breaker, cable) | 1 | lot | $450 | $450 | 7 % |  |
 | Balance of system | Generator 2-wire auto-start kit | 1 | ea | $350 | $350 | 7 % | Lets the GridBOSS start/stop the generator |
@@ -64,30 +80,30 @@
 | Labour | Inverter installation | 20 | h | $125 | $2,500 | — |  |
 | Labour | GridBOSS installation | 24 | h | $125 | $3,000 | — |  |
 | Labour | Battery installation | 12.5 | h | $125 | $1,563 | — |  |
-| Labour | Service rework (disconnect, splitter, panels) | 40 | h | $125 | $5,000 | — |  |
+| Labour | Off-grid distribution rework (two panels, circuit moves) | 40 | h | $125 | $5,000 | — |  |
 | Labour | Generator integration | 6 | h | $125 | $750 | — |  |
 | Labour | Commissioning & automation programming | 12 | h | $125 | $1,500 | — |  |
-| Labour | Contractor overhead & profit | 1 | lot | $4,727 | $4,727 | — | 12 % of BOS + labour |
+| Labour | Contractor overhead & profit | 1 | lot | $4,749 | $4,749 | — | 12 % of BOS + labour |
 | Soft costs | Electrical design, single-line diagram & load calc | 1 | lot | $1,800 | $1,800 | — |  |
 | Soft costs | Structural engineer roof-load letter | 1 | lot | $1,200 | $1,200 | — |  |
 | Soft costs | Scaffolding & fall protection (WorkSafeBC) | 1 | lot | $1,500 | $1,500 | — |  |
-| Soft costs | City of Victoria electrical permit | 1 | permit | $1,742 | $1,742 | — | $441 + 1.25 % of work value over $20k |
+| Soft costs | City of Victoria electrical permit | 1 | permit | $1,669 | $1,669 | — | $441 + 1.25 % of work value over $20k |
 | Soft costs | City of Victoria building permit (ground mount) | 1 | permit | $385 | $385 | — | $100 + 1.40 % of construction value |
-| Soft costs | Freight to Vancouver Island | 1 | lot | $2,541 | $2,541 | — |  |
+| Soft costs | Freight to Vancouver Island | 1 | lot | $2,361 | $2,361 | — |  |
 | Soft costs | Waste & packaging disposal | 1 | lot | $350 | $350 | — |  |
-| Contingency | Design & construction contingency | 1 | lot | $13,834 | $13,834 | — | 10 % of pre-tax subtotal |
+| Contingency | Design & construction contingency | 1 | lot | $13,229 | $13,229 | — | 10 % of pre-tax subtotal |
 
 | Summary | Amount |
 |---|---:|
-| Equipment | $84,700 |
-| Balance of system | $13,810 |
-| Labour | $30,310 |
-| Soft costs | $9,518 |
-| Contingency | $13,834 |
-| **Pre-tax total** | **$152,172** |
-| PST 7 % on taxable goods ($43,980) | $3,079 |
-| GST 5 % ($150,044, permit fees excluded) | $7,502 |
-| **Total installed cost** | **$162,752** ($4.02/W) |
+| Equipment | $78,700 |
+| Balance of system | $13,990 |
+| Labour | $30,331 |
+| Soft costs | $9,265 |
+| Contingency | $13,229 |
+| **Pre-tax total** | **$145,515** |
+| PST 7 % on taxable goods ($39,280) | $2,750 |
+| GST 5 % ($143,461, permit fees excluded) | $7,173 |
+| **Total installed cost** | **$155,438** ($3.84/W) |
 
 **Victoria-specific items**
 
@@ -101,35 +117,35 @@
 
 | Year | Gen kWh | Generator | Services | Gen. replaced | O&M | Standby utility | Replacements | Total |
 |---:|---:|---:|---:|:---:|---:|---:|---:|---:|
-| 1 | 815 | $3,847 | 8 |  | $300 | $78 | $0 | $4,225 |
-| 2 | 823 | $4,207 | 8 |  | $306 | $79 | $0 | $4,592 |
-| 3 | 831 | $7,745 | 8 | yes | $312 | $81 | $0 | $8,138 |
-| 4 | 839 | $4,679 | 9 |  | $318 | $83 | $0 | $5,080 |
-| 5 | 847 | $8,146 | 8 | yes | $325 | $84 | $0 | $8,555 |
-| 6 | 855 | $4,864 | 9 |  | $331 | $86 | $0 | $5,281 |
-| 7 | 863 | $8,550 | 8 | yes | $338 | $88 | $0 | $8,975 |
-| 8 | 871 | $5,068 | 9 |  | $345 | $89 | $0 | $5,502 |
-| 9 | 879 | $9,309 | 9 | yes | $351 | $91 | $0 | $9,751 |
-| 10 | 887 | $5,293 | 9 |  | $359 | $93 | $0 | $5,744 |
-| 11 | 895 | $9,734 | 9 | yes | $366 | $95 | $0 | $10,195 |
-| 12 | 903 | $5,542 | 9 |  | $373 | $97 | $0 | $6,011 |
-| 13 | 911 | $10,165 | 9 | yes | $380 | $99 | $17,977 | $28,621 |
-| 14 | 919 | $5,817 | 9 |  | $388 | $101 | $0 | $6,305 |
-| 15 | 927 | $10,599 | 9 | yes | $396 | $103 | $0 | $11,097 |
-| 16 | 935 | $6,524 | 10 |  | $404 | $105 | $43,661 | $50,693 |
-| 17 | 943 | $11,038 | 9 | yes | $412 | $107 | $0 | $11,556 |
-| 18 | 951 | $6,458 | 9 |  | $420 | $109 | $0 | $6,987 |
-| 19 | 959 | $11,908 | 10 | yes | $428 | $111 | $0 | $12,447 |
-| 20 | 967 | $7,273 | 10 |  | $437 | $113 | $0 | $7,823 |
-| 21 | 975 | $11,922 | 9 | yes | $446 | $116 | $0 | $12,483 |
-| 22 | 983 | $7,712 | 10 |  | $455 | $118 | $0 | $8,284 |
-| 23 | 991 | $12,830 | 10 | yes | $464 | $120 | $0 | $13,414 |
-| 24 | 999 | $13,523 | 10 | yes | $473 | $123 | $0 | $14,119 |
-| 25 | 1007 | $7,864 | 10 |  | $483 | $125 | $0 | $8,472 |
+| 1 | 756 | $3,435 | 7 |  | $300 | $0 | $0 | $3,735 |
+| 2 | 765 | $4,054 | 8 |  | $306 | $0 | $0 | $4,360 |
+| 3 | 775 | $7,375 | 7 | yes | $312 | $0 | $0 | $7,687 |
+| 4 | 784 | $4,174 | 8 |  | $318 | $0 | $0 | $4,493 |
+| 5 | 793 | $8,138 | 8 | yes | $325 | $0 | $0 | $8,463 |
+| 6 | 802 | $4,309 | 8 |  | $331 | $0 | $0 | $4,641 |
+| 7 | 812 | $8,589 | 8 | yes | $338 | $0 | $0 | $8,927 |
+| 8 | 821 | $4,806 | 9 |  | $345 | $0 | $0 | $5,150 |
+| 9 | 830 | $4,890 | 8 |  | $351 | $0 | $0 | $5,241 |
+| 10 | 839 | $8,867 | 8 | yes | $359 | $0 | $0 | $9,226 |
+| 11 | 849 | $5,447 | 9 |  | $366 | $0 | $0 | $5,813 |
+| 12 | 858 | $9,325 | 8 | yes | $373 | $0 | $0 | $9,698 |
+| 13 | 867 | $5,678 | 9 |  | $380 | $0 | $17,977 | $24,036 |
+| 14 | 876 | $10,172 | 9 | yes | $388 | $0 | $0 | $10,560 |
+| 15 | 886 | $5,934 | 9 |  | $396 | $0 | $0 | $6,330 |
+| 16 | 895 | $10,648 | 9 | yes | $404 | $0 | $43,661 | $54,713 |
+| 17 | 904 | $6,220 | 9 |  | $412 | $0 | $0 | $6,632 |
+| 18 | 913 | $11,128 | 9 | yes | $420 | $0 | $0 | $11,548 |
+| 19 | 923 | $6,540 | 9 |  | $428 | $0 | $0 | $6,968 |
+| 20 | 932 | $11,608 | 9 | yes | $437 | $0 | $0 | $12,045 |
+| 21 | 941 | $7,342 | 10 |  | $446 | $0 | $0 | $7,788 |
+| 22 | 950 | $12,091 | 9 | yes | $455 | $0 | $0 | $12,546 |
+| 23 | 960 | $7,761 | 10 |  | $464 | $0 | $0 | $8,225 |
+| 24 | 969 | $12,573 | 9 | yes | $473 | $0 | $0 | $13,046 |
+| 25 | 978 | $13,773 | 10 | yes | $483 | $0 | $0 | $14,256 |
 
-- Capital: **$162,752**
-- NPV of operating costs: **$159,061** ($274,354 nominal)
-- **Lifecycle cost (NPV): $321,813**
+- Capital: **$155,438**
+- NPV of operating costs: **$152,870** ($266,125 nominal)
+- **Lifecycle cost (NPV): $308,308**
 
 Generator model: $1.65/kWh ÷ current efficiency, $300 service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement ($3,500, assumption) once efficiency falls below 70 %.
 
@@ -137,10 +153,10 @@ Generator model: $1.65/kWh ÷ current efficiency, $300 service every 100 kWh, ef
 
 | Strategy | Gen kWh P50 | Gen kWh P90 | Mean year-1 cost | P90 cost | Starts P50 |
 |---|---:|---:|---:|---:|---:|
-| Forecast-aware (recommended) | 815 kWh | 947 kWh | $3,813 | $4,404 | 30 |
-| SOC trigger (30 % → 90 %) | 1,044 kWh | 1,122 kWh | $4,865 | $5,357 | 20 |
+| Forecast-aware (recommended) | 768 kWh | 903 kWh | $3,582 | $4,318 | 28 |
+| SOC trigger (30 % → 90 %) | 995 kWh | 1,121 kWh | $4,660 | $5,355 | 19 |
 
-Forecast-aware dispatch saves **$1,052/yr (22 %)** on this design. It only charges the battery enough to reach the next forecast solar surplus, so generator energy doesn't displace sun that would otherwise be curtailed.
+Forecast-aware dispatch saves **$1,078/yr (23 %)** on this design. It only charges the battery enough to reach the next forecast solar surplus, so generator energy doesn't displace sun that would otherwise be curtailed.
 
 ## 5. Design alternatives (optimizer)
 
@@ -148,12 +164,12 @@ Every panels × batteries mix is simulated in each of 20 weather years and coste
 
 | Tier | Rule | Panels | Batteries | Inverters | Capex | Gen kWh/yr (avg) | Lifecycle NPV, average | Lifecycle NPV, worst year |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| 1 · Essential | The lowest installed cost that meets every requirement. | 60 | 5 | 2 | $140,218 | 1833 | $441,181 | $466,736 |
-| **2 · Balanced (recommended)** | The lowest total cost in a bad weather year: installed plus running, in the worst of the simulated years. | 92 | 5 | 2 | $162,752 | 828 | $325,146 | $348,989 |
-| 3 · Independent | The least generator use within 2% of the lowest average total cost. | 120 | 7 | 3 | $206,974 | 347 | $316,894 | $349,947 |
-| 4 · Resilient | The least generator use of any design searched. | 120 | 16 | 3 | $275,175 | 129 | $396,790 | $431,818 |
+| 1 · Essential | The lowest installed cost that meets every requirement. | 48 | 6 | 2 | $132,061 | 2410 | $515,539 | $541,433 |
+| **2 · Balanced (recommended)** | The lowest total cost in a bad weather year: installed plus running, in the worst of the simulated years. | 92 | 5 | 2 | $155,438 | 786 | $310,574 | $333,284 |
+| 3 · Independent | The least generator use within 2% of the lowest average total cost. | 120 | 7 | 3 | $199,705 | 317 | $303,288 | $333,800 |
+| 4 · Resilient | The least generator use of any design searched. | 120 | 16 | 3 | $267,906 | 84 | $380,081 | $415,031 |
 
-298 candidates simulated (268 meet every requirement in every year). Near the optimum the lifecycle-cost surface is flat. The cheapest design on average is 120 panels / 7 batteries / 3 inverters at $316,894. The recommended 92 / 5 / 2 averages 2.6 % more, but needs $44,221 less capital and 1 fewer inverter(s) and has the lowest worst-year cost of any design ($348,989 vs $349,947). The cheapest compliant build saves $22,534 up front but costs $116,035 more over its life on average, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
+298 candidates simulated (264 meet every requirement in every year). Near the optimum the lifecycle-cost surface is flat. The cheapest design on average is 120 panels / 7 batteries / 3 inverters at $303,288. The recommended 92 / 5 / 2 averages 2.4 % more, but needs $44,267 less capital and 1 fewer inverter(s) and has the lowest worst-year cost of any design ($333,284 vs $333,800). The cheapest compliant build saves $23,377 up front but costs $204,965 more over its life on average, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
 
 ## 6. Context — the same load on BC Hydro
 

@@ -59,9 +59,11 @@ TestRunner.suite('PV string sizing (challenge Voc,max formula)', function () {
     assert.approxEqual(SunEngine.vocMax(38.9, 25, -0.25), 38.9, 1e-9, 'STC gives nameplate Voc');
   });
 
-  TestRunner.test('Victoria strings: 9–12 modules, cold Voc < 550 V', function (assert) {
+  TestRunner.test('Victoria strings: 11-module design cap retains cold-voltage margin', function (assert) {
     var sd = SunEngine.stringDesign(-16, 65);
     assert.equal(sd.maxSeries, 12, '⌊550 / 42.89⌋ = 12');
+    assert.equal(sd.series, 11, 'design cap keeps cold Vmp below 440 V');
+    assert.isTrue(11 * sd.vmpColdV < 440, '11-module cold Vmp stays inside full-power range');
     assert.equal(sd.minSeries, 9, 'hot Vmp must stay ≥ 250 V');
     assert.isTrue(sd.stringVocColdV < 550, 'string Voc under MPPT protection');
     assert.isTrue(sd.stringVocColdV < 600, 'string Voc under absolute max');
@@ -79,12 +81,23 @@ TestRunner.suite('PV string sizing (challenge Voc,max formula)', function () {
       'more cold → higher Voc → fewer modules');
   });
 
-  TestRunner.test('92 panels on 2 inverters → 8 strings of 11–12', function (assert) {
+  TestRunner.test('92 panels on 2 inverters → nine strings of 10–11', function (assert) {
     var sd = SunEngine.stringDesign(-16, 65);
     var lay = SunEngine.stringLayout(92, 2, sd);
-    assert.equal(lay.count, 8, 'eight strings');
+    assert.equal(lay.count, 9, 'nine strings from the conservative cap');
     assert.equal(lay.strings.reduce(function (a, b) { return a + b; }, 0), 92, 'all modules placed');
     assert.isTrue(lay.ok, 'layout within limits');
+  });
+});
+
+TestRunner.suite('Planning assumptions', function () {
+  TestRunner.test('illustrative coincident loads sum to the 15 kW planning peak', function (assert) {
+    var sum = SunData.PEAK_LOADS.reduce(function (a, x) { return a + x.kw; }, 0);
+    assert.approxEqual(sum, 15, 1e-9, 'load schedule matches the stated planning peak');
+  });
+
+  TestRunner.test('indoor battery assumption leaves heaters off by default', function (assert) {
+    assert.equal(SunSettings.defaults().heaterHoursWinter, 0, 'no outdoor battery-heater load by default');
   });
 });
 

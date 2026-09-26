@@ -122,7 +122,7 @@
     var maxSeries = Math.floor(I.mpptHighProtectV / vocCold);
     var minSeries = Math.ceil(I.mpptFullPowerV[0] / vmpHot);
     // Largest length whose cold Vmp still sits inside the full-power window.
-    var series = maxSeries;
+    var series = Math.min(maxSeries, P.designMaxSeries || maxSeries);
     while (series > minSeries && series * vmpCold > I.mpptFullPowerV[1]) series--;
 
     // Parallel strings per MPPT limited by the MPPT short-circuit rating.
@@ -139,6 +139,7 @@
       vmpColdV: vmpCold,
       minSeries: minSeries,
       maxSeries: maxSeries,
+      designMaxSeries: P.designMaxSeries || maxSeries,
       series: series,
       stringVocColdV: series * vocCold,
       stringVmpHotV: series * vmpHot,

@@ -6,7 +6,7 @@
  * Line-item capital budget and lifecycle cost for Victoria, BC.
  *
  *   Equipment   challenge unit prices (panels include racking)
- *   BOS         rapid shutdown, wiring, disconnects, generator start kit …
+ *   BOS         rapid shutdown, wiring, distribution, generator start kit …
  *   Labour      hours × Victoria billed rates, plus contractor overhead
  *   Soft costs  City of Victoria electrical/building permits (actual fee
  *               formulas), design, engineering, freight, access
@@ -14,7 +14,7 @@
  *               not exempt under BC PST Bulletin 203 (PV panels, inverters,
  *               wiring and controllers bought as part of a PV system are
  *               exempt; batteries and general electrical gear are not)
- *   Lifecycle   generator (with service + degradation), O&M, standby utility
+ *   Lifecycle   generator (with service + degradation), O&M
  *               charge, inverter & battery replacement, discounted to NPV
  * ═══════════════════════════════════════════════════════════════════════════════
  */
@@ -38,7 +38,7 @@
     inverter: 10,
     gridboss: 12,
     battery: 2.5,
-    serviceRework400: 40,   // disconnect, splitter, 2 × 200 A panels, circuit moves
+    serviceRework400: 40,   // 2 × 200 A panels, circuit moves
     serviceRework200: 24,
     generator: 6,
     commissioning: 12       // settings, CT checks, automation programming, handover
@@ -92,8 +92,6 @@
     lines.push(line(EQP, EQ.inverter.model + ' hybrid inverter', d.inverters, 'ea', EQ.inverter.unitPrice, { note: 'PST-exempt: DC→AC device in a PV system' }));
     lines.push(line(EQP, EQ.gridboss.model + ' microgrid interconnect', d.gridboss, 'ea', EQ.gridboss.unitPrice, { note: 'Treated as PV-system controller (PST-exempt) — confirm with supplier' }));
     lines.push(line(EQP, EQ.battery.model, d.batteries, 'ea', EQ.battery.unitPrice, { pst: true, note: 'Batteries are not PST-exempt (PST 203)' }));
-    lines.push(line(EQP, EQ.fusedDisconnect.model, 1, 'ea', EQ.fusedDisconnect.unitPrice, { pst: true }));
-    lines.push(line(EQP, EQ.splitter.model, 1, 'ea', EQ.splitter.unitPrice, { pst: true }));
     lines.push(line(EQP, EQ.panel200.model, panels200, 'ea', EQ.panel200.unitPrice, { pst: true, note: 'One per GridBOSS / 200 A leg' }));
     lines.push(line(EQP, 'BE7500ID generator (existing, reused)', 1, 'ea', 0, { note: 'Moves to GridBOSS GEN port; manual transfer switch retired' }));
 
@@ -104,7 +102,8 @@
     }
     lines.push(line(BOS, 'PV wire, MC4, conduit per string', strings, 'string', 180));
     lines.push(line(BOS, 'PV DC disconnect / breakers', d.inverters, 'ea', 300));
-    lines.push(line(BOS, 'Inverter AC + battery cabling kit', d.inverters, 'ea', 650));
+    lines.push(line(BOS, 'Inverter AC + battery cabling / protection kit', d.inverters, 'ea', 650,
+      { pst: true, note: 'Allowance includes a 350 A Class-T fuse/holder per inverter; final conductor ampacity and OCPD coordination by the electrical designer' }));
     lines.push(line(BOS, 'Battery busbar / interconnect cables', d.batteries, 'ea', 120, { pst: true }));
     lines.push(line(BOS, 'Generator interconnect (inlet, 40 A breaker, cable)', 1, 'lot', 450, { pst: true }));
     lines.push(line(BOS, 'Generator 2-wire auto-start kit', 1, 'ea', 350, { pst: true, note: 'Lets the GridBOSS start/stop the generator' }));
@@ -122,7 +121,7 @@
     lines.push(line(LAB, 'Inverter installation', d.inverters * HOURS.inverter, 'h', eRate));
     lines.push(line(LAB, 'GridBOSS installation', d.gridboss * HOURS.gridboss, 'h', eRate));
     lines.push(line(LAB, 'Battery installation', d.batteries * HOURS.battery, 'h', eRate));
-    lines.push(line(LAB, 'Service rework (disconnect, splitter, panels)',
+    lines.push(line(LAB, 'Off-grid distribution rework (two panels, circuit moves)',
       d.serviceA > 200 ? HOURS.serviceRework400 : HOURS.serviceRework200, 'h', eRate));
     lines.push(line(LAB, 'Generator integration', HOURS.generator, 'h', eRate));
     lines.push(line(LAB, 'Commissioning & automation programming', HOURS.commissioning, 'h', eRate));
@@ -222,7 +221,7 @@
         genServices: gen[y].services,
         genReplacements: gen[y].replacements,
         om: d.omPerYear * esc,
-        utility: d.keepUtility ? bcHydroAnnual(0, true) * esc : 0,
+        utility: 0,
         inverters: y + 1 === d.inverterReplaceYear ?
           replacementCost(EQ.inverter.unitPrice, d.inverters, HOURS.inverter, d.electricianRate, false) * esc : 0,
         batteries: y + 1 === d.batteryReplaceYear ?

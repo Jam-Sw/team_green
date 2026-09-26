@@ -36,7 +36,7 @@
       var cap = m.cap, life = m.life, d = m.d;
       U.$('budgetKpis').innerHTML =
         U.kpi('Installed cost', U.money(cap.total), U.money(cap.subtotal) + ' + ' + U.money(cap.pst + cap.gst) + ' tax') +
-        U.kpi('Running cost, year 1', U.money(life.annualOpex), 'generator, upkeep, standby utility') +
+        U.kpi('Running cost, year 1', U.money(life.annualOpex), 'generator and upkeep') +
         U.kpi(d.horizonYears + '-year cost', U.money(life.lifecycle), 'installed + running, in today\'s dollars');
       renderInstalled(cap, d);
       renderRunning(life, d);
@@ -93,7 +93,7 @@
       labels: life.years.map(function (y) { return String(y.year); }), unit: '$', height: 220,
       series: [
         { name: 'Generator', color: U.COLORS.gen, values: life.years.map(function (y) { return y.generator; }) },
-        { name: 'Upkeep + standby utility', color: U.COLORS.aqua, values: life.years.map(function (y) { return y.om + y.utility; }) },
+        { name: 'Upkeep', color: U.COLORS.aqua, values: life.years.map(function (y) { return y.om; }) },
         { name: 'Inverter / battery replacement', color: U.COLORS.battery, values: life.years.map(function (y) { return y.inverters + y.batteries; }) }
       ],
       tipTitle: function (i) { return 'Year ' + life.years[i].year + ' · ' + U.money(life.years[i].total); }

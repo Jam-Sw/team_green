@@ -10,11 +10,11 @@ The architecture follows [`shubin123/drippage`](https://github.com/shubin123/dri
 
 ```bash
 python3 -m http.server 8000     # then open http://localhost:8000
-node tests/run-tests.js         # 56 tests: physics, datasheet rules, budget
+node tests/run-tests.js         # 58 tests: physics, datasheet rules, budget
 node tools/report.js            # regenerate docs/BUDGET_VICTORIA.md
 
 npm install && npx playwright install chromium
-npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 13 browser tests
+npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 14 browser tests
 E2E_BASE_URL=https://jam-sw.github.io/team_green/ npm run test:e2e:live   # same tests on the live site
 ```
 
@@ -24,11 +24,11 @@ GitHub Pages publishes `main` from the repository root at https://jam-sw.github.
 
 | | |
 |---|---|
-| Solar | **92 × JA Solar JAM54D41-440/LB** — 40.5 kWp, 8 strings of 11–12 |
+| Solar | **92 × JA Solar JAM54D41-440/LB** — 40.5 kWp, 9 strings of 10–11 (11-module design cap) |
 | Inverters | **2 × EG4 FlexBOSS21** (paralleled, shared 48 V bank) |
-| GridBOSS | **2** — one per 200 A leg of the 400 A service |
+| GridBOSS | **2** — one per 200 A leg of the 400 A service; a 200 A service setting uses one |
 | Storage | **5 × EG4 280Ah All-Weather** — 71.7 kWh (57 kWh usable) |
-| Service | 400 A fused disconnect → distribution splitter → 2 × 200 A panels |
+| Service | Completely off-grid: 2 × GridBOSS → 2 × 200 A panels; no utility connection |
 | Generator | Existing BE7500ID on the GridBOSS GEN port, 2-wire auto-start |
 | Installed cost | **≈ $163k incl. GST/PST** (see [docs/BUDGET_VICTORIA.md](docs/BUDGET_VICTORIA.md)) |
 | Winter backup, no generator | 9+ days at average sun (target: 3) |
@@ -47,8 +47,9 @@ Every tab opens with one sentence saying what it shows, and every chart has a ca
 | **Energy** | Average day by season (where each hour's power comes from), battery level, month by month, every hour of the year, backup days with no generator |
 | **Generator** | The automation in three steps (read → decide → act), forecast-aware vs. a battery-level rule over 20 weather years, generator cost by year |
 | **Optimizer** | 25-year cost of every panel × battery mix; numbered Suggestions tiers; click any square to load that design |
-| **Budget** | Installed cost by category with all line items on request (permits, PST/GST, labour), CSV export, running cost by year, BC Hydro comparison |
+| **Budget** | Installed cost by category with all line items on request (permits, PST/GST, labour), CSV export, running cost by year, and an off-grid context comparison |
 | **Assumptions** | Model and budget assumptions, a glossary of terms, and sources |
+| **Layout** | Optional movable panel-array sketch for discussing placement; it does not change the sizing, optimizer or budget |
 
 ## How the code is organised
 

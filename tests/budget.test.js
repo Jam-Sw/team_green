@@ -42,15 +42,13 @@ TestRunner.suite('Capital budget', function () {
     assert.equal(find(/FlexBOSS21/).unitCost, 5500, 'FlexBOSS21');
     assert.equal(find(/GridBOSS microgrid/).unitCost, 2500, 'GridBOSS');
     assert.equal(find(/280Ah/).unitCost, 5500, 'battery');
-    assert.equal(find(/fused/).unitCost, 1500, 'fused disconnect');
-    assert.equal(find(/splitter/i).unitCost, 4500, 'distribution splitter');
     assert.equal(find(/200 A electrical panel/).unitCost, 1500, '200 A panel');
   });
 
   TestRunner.test('equipment subtotal matches hand calculation', function (assert) {
     var d = budgetDesign();
     var cap = SunBudget.capex(d);
-    var expected = d.panels * 350 + d.inverters * 5500 + d.gridboss * 2500 + d.batteries * 5500 + 1500 + 4500 + 2 * 1500;
+    var expected = d.panels * 350 + d.inverters * 5500 + d.gridboss * 2500 + d.batteries * 5500 + 2 * 1500;
     assert.approxEqual(cap.byCategory.Equipment, expected, 1e-9, 'equipment');
   });
 
@@ -162,12 +160,11 @@ TestRunner.suite('Budget-sensitive settings', function () {
     var labour = projectedBudget({ electricianRate: 200, installerRate: 150 });
     var allowances = projectedBudget({ overheadPct: 30, contingencyPct: 25, freightPct: 10 });
     var future = projectedBudget({ horizonYears: 30, discountPct: 0, escalationPct: 6, omPerYear: 1500 });
-    var noUtility = projectedBudget({ keepUtility: false });
 
     assert.isTrue(labour.cap.total > base.cap.total, 'labour rates increase installed cost');
     assert.isTrue(allowances.cap.total > base.cap.total, 'overhead, contingency and freight increase installed cost');
     assert.isTrue(future.life.lifecycle > base.life.lifecycle, 'horizon, discount, escalation and upkeep increase lifecycle cost');
-    assert.isTrue(noUtility.life.lifecycle < base.life.lifecycle, 'removing standby utility lowers lifecycle cost');
+    assert.isTrue(base.life.years.every(function (y) { return y.utility === 0; }), 'off-grid design has no standby-utility cost');
   });
 });
 

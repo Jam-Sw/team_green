@@ -72,6 +72,10 @@
       tempCoeffPmaxPct: -0.290,  // %/°C — JA Solar datasheet (n-type TOPCon)
       areaM2: 1.762 * 1.134,
       degradationPctPerYr: 0.40, // JA Solar linear warranty, years 2–30
+      // A 12-module string is electrically permissible at the modelled cold
+      // condition (about 436 V Vmp), but the design deliberately uses 11
+      // maximum for margin below the 440 V full-power ceiling.
+      designMaxSeries: 11,
       unitPrice: 350,            // incl. racking — challenge package
       source: 'JA Solar JAM54D41 LB datasheet'
     },
@@ -132,8 +136,6 @@
       efficiencyLossPerService: 0.02,
       source: 'Challenge package'
     },
-    fusedDisconnect: { model: '400 A fused service disconnect', unitPrice: 1500 },
-    splitter:        { model: 'Distribution splitter',           unitPrice: 4500 },
     panel200:        { model: '200 A electrical panel',          unitPrice: 1500 }
   };
 
@@ -178,6 +180,16 @@
     }
   };
 
+  // Illustrative coincident-load schedule used solely to explain the 15 kW
+  // planning peak. It is not measured load data and must be replaced by a
+  // load calculation before construction.
+  var PEAK_LOADS = [
+    { load: 'Heat pump / air handler', kw: 4.5 },
+    { load: 'Electric range / oven', kw: 6.0 },
+    { load: 'Clothes dryer', kw: 4.0 },
+    { load: 'Refrigeration, lighting and plug loads', kw: 0.5 }
+  ];
+
   // ═══════════════════════════════════════════════════════════════════════════
   // SOURCES — shown in the app's reference panel and the generated report
   // ═══════════════════════════════════════════════════════════════════════════
@@ -201,6 +213,7 @@
     MONTH_NAMES: Object.freeze(MONTH_NAMES),
     EQUIPMENT: EQUIPMENT,
     VICTORIA: VICTORIA,
+    PEAK_LOADS: PEAK_LOADS,
     SOURCES: SOURCES
   });
 }));

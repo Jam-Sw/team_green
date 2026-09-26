@@ -6,7 +6,7 @@
  *
  *   1 sun → FlexBOSS21 inverters        4 GridBOSS → 200 A panels → house
  *   2 inverters ↔ shared 48 V battery   5 generator → GridBOSS GEN port
- *   3 inverters → GridBOSS (AC)         6 BC Hydro → disconnect → splitter
+ *   3 inverters → GridBOSS (AC)         6 off-grid distribution + bonding
  *
  * Every element carries data-step="n"; the step list under the drawing
  * highlights one step at a time.
@@ -23,11 +23,11 @@ window.SunSld = (function () {
 
   var STEPS = [
     { t: 'Sun → inverters', d: 'Panel strings feed each FlexBOSS21 inverter, which turns sunlight into usable power.' },
-    { t: 'Inverters ↔ battery', d: 'All inverters share one 48 V battery bank. Surplus sun charges it; at night it runs the house.' },
+    { t: 'Inverters ↔ battery', d: 'Each inverter has a 350 A Class-T fuse on its battery positive lead; all inverters share one 48 V battery bank. Final cable and fuse sizing needs electrical design.' },
     { t: 'Inverters → GridBOSS', d: 'Inverter output meets at the GridBOSS, which picks the power source for the house.' },
     { t: 'GridBOSS → house', d: 'Each GridBOSS feeds one 200 A panel, so the full service stays available.' },
-    { t: 'Generator backup', d: 'The existing generator plugs into the GridBOSS and starts itself only when the forecast says the battery will fall short.' },
-    { t: 'BC Hydro standby', d: 'The utility stays connected through a new disconnect and splitter, as standby only. Nothing is exported.' }
+    { t: 'Generator backup', d: 'The existing generator plugs into the GridBOSS and starts itself only when the forecast says the battery will fall short. Its neutral remains floating.' },
+    { t: 'Off-grid distribution', d: 'There is no utility connection. Two 200 A GridBOSS legs feed the 400 A home distribution; the final design makes one neutral–ground bond at the off-grid main disconnect.' }
   ];
 
   function render(el, d) {
@@ -56,14 +56,12 @@ window.SunSld = (function () {
         '<text x="' + x + '" y="' + (y + 4) + '">' + step + '</text></g>');
     }
 
-    // ── 6 Utility chain and 5 generator (left column) ───────────────────
-    box(6, 30, 40, 150, 44, 'BC HYDRO METER', 'standby · zero export', 'existing');
-    box(6, 30, 120, 150, 44, d.serviceA + ' A DISCONNECT', 'fused · service entrance');
-    box(6, 30, 200, 150, 44, 'SPLITTER', 'one leg per GridBOSS');
-    box(5, 30, 330, 150, 44, 'BE7500ID 6 kW', 'existing · 2-wire start', 'existing');
-    wire(6, [[105, 84], [105, 120]]);
+    // ── 6 Off-grid distribution note and 5 generator (left column) ─────
+    box(6, 30, 120, 150, 44, d.serviceA + ' A MAIN', 'off-grid · one N–G bond');
+    box(6, 30, 200, 150, 44, 'DISTRIBUTION', 'two 200 A legs');
+    box(5, 30, 330, 150, 44, 'BE7500ID 6 kW', 'existing · neutral floating', 'existing');
     wire(6, [[105, 164], [105, 200]]);
-    mark(6, 30, 40);
+    mark(6, 30, 120);
     mark(5, 30, 330);
 
     // ── One column per GridBOSS; inverters and batteries spread across ──
@@ -92,14 +90,13 @@ window.SunSld = (function () {
         else box(1, x, 290, iw, 44, '#' + (invIdx + 1), 'FlexBOSS21');
         box(2, x, 380, iw, 44, bats + ' × 280Ah', n1(bats * EQ.battery.energyKwh) + ' kWh');
         wire(3, [[xm, 244], [xm, 290]], '', invIdx === 0 ? '240 V AC' : '', xm + 6, 272);
-        wire(2, [[xm, 334], [xm, 380]], 'bat');
+        wire(2, [[xm, 334], [xm, 380]], 'bat', '350 A CLASS-T', xm + 6, 363);
         if (invIdx === 0) { mark(1, x, 290); mark(2, x, 380); }
         batX.push(xm);
         invIdx++;
       }
     }
-    // 6 Splitter feeds every GridBOSS along one line.
-    wire(6, [[180, 222], [lastGb, 222]], '', '240 V AC', 186, 216);
+    // 6 Distribution note; GridBOSS load outputs feed the two house panels.
     // 2 Paralleled inverters share one 48 V bank.
     batX.forEach(function (x) { wire(2, [[x, 424], [x, 448]], 'bat'); });
     if (batX.length > 1) wire(2, [[batX[0], 448], [batX[batX.length - 1], 448]], 'bat', '48 V DC BUS', batX[0] + 6, 462);
@@ -115,7 +112,7 @@ window.SunSld = (function () {
         return '<li><button type="button" data-step="' + (i + 1) + '"><span class="bp-n">' + (i + 1) + '</span>' +
           '<b>' + s.t + '</b><span>' + s.d + '</span></button></li>';
       }).join('') + '</ol>' +
-      '<p class="muted">The existing emergency-loads panel is re-fed from panel A; the manual transfer switch is retired (GridBOSS handles source transfer).</p>';
+      '<p class="muted">This concept has no utility connection. The existing emergency-loads panel is re-fed from panel A; the manual transfer switch is retired (GridBOSS handles source transfer). 2/0 Cu (175 A) is shown only as a preliminary cable concept; a licensed electrical designer must coordinate conductor ampacity, parallel conductors and the 350 A Class-T fuse. Make one neutral–ground bond at the listed off-grid main disconnect; confirm the generator neutral configuration with its manual.</p>';
 
     wireSteps(el);
   }

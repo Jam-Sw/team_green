@@ -37,7 +37,8 @@
         U.card('Challenge requirements', U.caption('Checked against the simulated year. Change a setting and the list updates.') +
           '<ul class="checklist" id="checklist"></ul>', '<span class="pill" id="checkCount"></span>') +
       '</div>' +
-      U.card('How it connects', U.caption('Follow the numbers from the sun to the house. Point at a step to highlight it.') + '<div id="sld" class="sld"></div>'),
+      U.card('How it connects', U.caption('Follow the numbers from the sun to the house. Point at a step to highlight it.') + '<div id="sld" class="sld"></div>') +
+      U.card('15 kW peak-demand basis', U.caption('Illustrative coincident loads used to set the inverter minimum; replace with a measured load calculation before construction.') + '<div id="peakLoads"></div>'),
 
     render: function (m) {
       var d = m.d, T = m.T, t = m.target;
@@ -64,6 +65,7 @@
       }).join('');
 
       window.SunSld.render(U.$('sld'), d);
+      renderPeakLoads(d);
       renderStrings(d);
     }
   });
@@ -87,11 +89,15 @@
         ? 'up to ' + EQ.gridboss.maxInverters + ' inverters each'
         : 'one per ' + EQ.gridboss.ratedA + ' A of service'],
       ['EG4 280Ah battery', d.batteries, U.n1(d.batteryKwh) + ' kWh · ' + chosen(d.batteries, mn.batteries) + 'at least ' + mn.batteries + ' for ' + batReason],
-      [d.serviceA + ' A fused disconnect', 1, 'service entrance; BC Hydro stays as standby'],
-      ['Distribution splitter', 1, 'one 200 A leg per GridBOSS'],
       ['200 A panel', Math.ceil(d.serviceA / 200), 'one per GridBOSS'],
       ['BE7500ID generator', 1, 'existing; moves to the GridBOSS generator port']
     ];
+  }
+
+  function renderPeakLoads(d) {
+    var loads = window.SunData.PEAK_LOADS;
+    U.$('peakLoads').innerHTML = U.table([{ t: 'Coincident load' }, { t: 'Demand', num: true }],
+      loads.map(function (x) { return [x.load, U.n1(x.kw) + ' kW']; }).concat([['<b>Total planning peak</b>', '<b>' + U.n1(loads.reduce(function (a, x) { return a + x.kw; }, 0)) + ' kW</b>']]));
   }
 
   function renderStrings(d) {
@@ -102,7 +108,8 @@
       ['Fewest panels per string, staying above ' + I.mpptFullPowerV[0] + ' V when hot (' + d.designHotCellC + ' °C)', '<b>' + sd.minSeries + '</b>'],
       ['Strings in this design', d.layout.count + ' strings of ' + U.span(d.layout.strings) + ' panels, ' + d.layout.perInverter + ' per inverter (' + sd.stringsPerInverter + ' inputs)'],
       ['String voltage: cold maximum / hot minimum', U.n1(Math.max.apply(null, d.layout.strings) * sd.vocColdV) + ' V / ' + U.n1(Math.min.apply(null, d.layout.strings) * sd.vmpHotV) + ' V'],
-      ['Strings per inverter input (panel current ' + P.iscA + ' A; inputs rated 31 / 31 / 19 A)', sd.stringsPerMppt.join(' / ')]
+      ['Design string cap', '11 panels, even though 12 is below the 550 V cold-Voc protection limit; 11 × cold Vmp = ' + U.n1(11 * sd.vmpColdV) + ' V (< 440 V full-power ceiling)'],
+      ['Parallel strings per inverter input (Isc)', '2 × ' + P.iscA + ' A = ' + U.n1(2 * P.iscA) + ' A ≤ 31 A on MPPT 1/2; one string on the 19 A MPPT']
     ]);
   }
 })();

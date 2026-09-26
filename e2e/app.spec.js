@@ -192,7 +192,7 @@ test('in-browser unit test page passes', async ({ page }) => {
 
 test('every tab explains itself: an intro, and a caption on every chart', async ({ page }) => {
   await page.goto('./');
-  for (const name of ['Overview', 'Suggestions', 'Energy', 'Generator', 'Optimizer', 'Budget', 'Assumptions']) {
+  for (const name of ['Overview', 'Suggestions', 'Energy', 'Generator', 'Optimizer', 'Budget', 'Assumptions', 'Layout']) {
     await page.getByRole('tab', { name }).click();
     const panel = page.locator('#tab-' + name.toLowerCase());
     await expect(panel.locator('.intro')).not.toBeEmpty();
@@ -201,6 +201,21 @@ test('every tab explains itself: an intro, and a caption on every chart', async 
       .map((c) => c.id));
     expect(uncaptioned, 'charts without a caption').toEqual([]);
   }
+});
+
+test('layout is an optional movable visual and does not change the budget', async ({ page }) => {
+  await page.goto('./#layout');
+  await expect(page.locator('#layoutSvg')).toBeVisible();
+  await expect(page.locator('#layoutReadout')).toContainText('92 panels');
+  const budgetBefore = await page.locator('#kpis').textContent();
+  const box = await page.locator('.array-hit').boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2 + 20);
+  await page.mouse.up();
+  await expect(page.locator('#layoutSvg .layout-array')).toBeVisible();
+  await expect(page.locator('#kpis')).toHaveText(budgetBefore);
+  await expect(page.getByRole('tab', { name: 'Layout' })).toBeVisible();
 });
 
 test('settings read in plain units', async ({ page }) => {

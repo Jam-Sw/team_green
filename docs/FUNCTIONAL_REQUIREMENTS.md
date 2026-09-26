@@ -21,7 +21,7 @@ Design a solar + battery system from EG4 FlexBOSS21 inverters, EG4 280Ah All-Wea
 | FR-9 | Operate completely off-grid; no power exported or sold | Challenge | No export path in dispatch; surplus PV is curtailed and reported | Checklist FR-9; test "no export: surplus is curtailed" |
 | FR-10 | Minimise the generator's annual operating cost: $1.65/kWh, $300 service every 100 kWh, 2 % efficiency loss per service | Challenge — *Generator Optimization* | `engine.js` `runGenerator()`, `generatorCostByYear()`; forecast-aware dispatch; lifecycle optimizer | tests › Generator accounting; Generator tab 20-year comparison |
 | FR-11 | Account for the interaction of seasonal solar, battery capacity, inverter capacity and the hourly load profile when deciding when the generator runs | Challenge | 8,760-hour simulation with efficiencies and power limits; 36 h look-ahead dispatch | Energy tab charts; test "forecast-aware dispatch uses less generator" |
-| FR-12 | Integrate PV, batteries, FlexBOSS21, GridBOSS, generator and the existing 400 A service into a practical system | Challenge — *Basic System Flow* | 400 A fused disconnect → distribution splitter → 2 × GridBOSS → 2 × 200 A panels; inverters paralleled on a shared 48 V bank | Overview single-line diagram |
+| FR-12 | Integrate PV, batteries, FlexBOSS21, GridBOSS, generator and the existing 400 A service into a practical system | Challenge — *Basic System Flow* | No utility connection: 2 × GridBOSS → 2 × 200 A panels; inverters paralleled on a shared 48 V bank, generator on the GEN port | Overview single-line diagram |
 | FR-13 | Total system cost using the challenge equipment prices | Challenge — *Equipment Costs* | `budget.js` `capex()` | test "challenge unit prices are used" |
 
 ## Financial requirements (rubric: Business — 20 %)
@@ -29,7 +29,7 @@ Design a solar + battery system from EG4 FlexBOSS21 inverters, EG4 280Ah All-Wea
 | ID | Requirement | Implementation |
 |---|---|---|
 | FR-14 | High-fidelity capital budget for the City of Victoria: equipment, balance of system, labour, permits, taxes, contingency | `budget.js` `capex()`, covering the City of Victoria electrical permit ($441 + 1.25 % over $20k), building permit ($100 + 1.40 %), BC PST per Bulletin 203 (batteries taxable, PV exempt), GST 5 %, island freight, WorkSafeBC access, CEC 64-218 rapid shutdown |
-| FR-15 | Operating and lifecycle cost: generator (with service, degradation, replacement), O&M, standby utility, inverter and battery replacement, discounted to NPV | `budget.js` `lifecycle()`; `engine.js` `lifecycleEnergy()` (PV ageing 0.4 %/yr) |
+| FR-15 | Operating and lifecycle cost: generator (with service, degradation, replacement), O&M, inverter and battery replacement, discounted to NPV | `budget.js` `lifecycle()`; `engine.js` `lifecycleEnergy()` (PV ageing 0.4 %/yr) |
 | FR-16 | Compare meaningful design alternatives and show how choices move capital vs operating cost | Design search over 20 weather years (`ui/search.js`, `engine.js` `evaluateYears()`): Optimizer heatmap, Suggestions tiers (recommended = lowest worst-year lifecycle cost); `docs/BUDGET_VICTORIA.md` §5 |
 | FR-17 | State assumptions and sources | Assumptions tab; `data.js` `SOURCES` |
 | FR-18 | Exportable budget | CSV export (Budget tab); `node tools/report.js` → `docs/BUDGET_VICTORIA.md` |
@@ -57,6 +57,8 @@ Design a solar + battery system from EG4 FlexBOSS21 inverters, EG4 280Ah All-Wea
 1. Seasons are Dec–Feb (winter), Mar–May (spring), Jun–Aug (summer), Sep–Nov (fall).
 2. The three-day backup test starts from a full battery at midnight under average season sun, with no generator. The zero-sun result is also reported as a stress case.
 3. The generator's 2 % "efficiency" loss per service raises fuel cost per kWh ($1.65 ÷ efficiency); rated output is unchanged. Replacing it below 70 % efficiency for $3,500 is an assumption.
-4. The BC Hydro service stays connected only as zero-export standby (basic charge). The model never imports from it.
+4. The proposed system is completely off-grid: it has no BC Hydro connection, imports no utility energy and exports no energy.
 5. The GridBOSS is treated as a PST-exempt PV-system controller; confirm this with the supplier.
 6. Multiple GridBOSS units sharing one paralleled FlexBOSS21 battery bank must be confirmed with EG4 for this exact configuration.
+7. The current design deliberately caps strings at 11 modules even though 12 passes the cold-Voc protection calculation: 11 maintains margin below the 440 V full-power ceiling at the −16 °C design condition.
+8. The one-line is preliminary, not construction documentation: the final design must coordinate 350 A Class-T protection with conductor ampacity, make exactly one neutral–ground bond at the first service disconnect, and verify the generator neutral arrangement with its manufacturer.

@@ -30,7 +30,7 @@
           'The battery is used between ' + d.minSocPct + '% and 100%. Each year is simulated twice, so 1 January starts from a realistic level.',
           'Generator: $' + d.genCostPerKwh.toFixed(2) + ' per kWh ÷ efficiency, a $' + d.genServiceCost + ' service every 100 kWh, 2% efficiency lost per service, replaced at ' + Math.round(d.genReplaceAtEff * 100) + '% for ' + U.money(d.genReplaceCost) + '.',
           'Backup test: full battery at midnight, average ' + m.target.season.name.toLowerCase() + ' sun, no generator, for ' + d.autonomyDays + ' days.',
-          'Nothing is exported: surplus solar is turned down. BC Hydro stays connected as standby only.'
+          'This is completely off-grid: there is no utility connection. Surplus solar is turned down once the batteries are full.'
         ]) + '</div>') +
         U.card('Budget (Victoria, BC)', '<div class="prose">' + list([
           'Equipment at the challenge\'s prices; the panel price includes racking. The existing generator is reused at no cost.',
@@ -54,7 +54,7 @@
           ['Today\'s dollars', 'Future costs discounted at ' + d.discountPct + '% a year so they can be added to money spent now (net present value).'],
           ['Balance of system', 'Everything besides the main equipment: wiring, mounts, safety devices.'],
           ['FlexBOSS21', 'EG4 hybrid inverter: solar in, battery in and out, 240 V AC out.'],
-          ['GridBOSS', 'EG4 microgrid switch. It joins the inverters, generator, utility and house panels, and picks the source.']
+          ['GridBOSS', 'EG4 microgrid switch. It joins the inverters, generator and house panels, and picks the source.']
         ])) +
         U.card('Sources', '<div class="prose">' + list(D.SOURCES.map(function (s) {
           return s.url ? '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>' : s.label;
