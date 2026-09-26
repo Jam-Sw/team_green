@@ -3,7 +3,7 @@
  * Tiered designs from the design search (ui/search.js), from the lowest
  * installed cost to the least generator use. Every tier meets all the
  * challenge requirements; "Use this tier" moves the System sliders to it.
- * Each tier's numbers come from the same full model the other tabs use.
+ * Each tier's numbers come from the same local model the other tabs use.
  */
 (function () {
   'use strict';
@@ -16,10 +16,17 @@
     id: 'suggestions',
     title: 'Suggestions',
     intro: function (m) {
-      return 'Tiered designs, from the lowest installed cost to the least generator use. Every tier meets all ' + m.checks.length +
-        ' challenge requirements, and <b>Use this tier</b> moves the System sliders to it.';
+      return 'Four acceptable projected designs, from the lowest upfront cost to the least generator use. Every tier meets all ' + m.checks.length +
+        ' challenge requirements. <b>Use this tier</b> applies its panel and battery counts to System.';
     },
     html:
+      U.card('How the local projection works',
+        U.caption('This is a transparent calculation running in this browser, not an AI recommendation or a contractor quote.') +
+        '<ol class="projection-flow" id="projectionFlow">' +
+          '<li><b>1. Start with your settings</b><span>Home use, Victoria weather, backup target, component limits and costs.</span></li>' +
+          '<li><b>2. Test every acceptable mix</b><span>Each panel × battery mix is sized, simulated hour by hour across 20 weather years, then costed over the selected period.</span></li>' +
+          '<li><b>3. Keep four useful trade-offs</b><span>Lowest installed cost, lowest bad-year cost, lower generator use near the lowest average cost, and least generator use.</span></li>' +
+        '</ol><p class="projection-note" id="projectionNote"></p>') +
       '<div id="tierProgress" class="card searching"><p class="muted">Simulating every design…</p>' +
         '<span class="progress"><span id="tierBar"></span></span></div>' +
       '<div class="tiers" id="tiers"></div>' +
@@ -36,6 +43,7 @@
     },
 
     render: function (m) {
+      renderProjectionNote(m);
       Search.request(m.s, 'suggestions', {
         progress: function (f) { U.$('tierBar').style.width = (f * 100) + '%'; },
         done: function (r) { draw(r, app.model()); }
@@ -47,6 +55,17 @@
       }
     }
   });
+
+  /** State the inputs behind a projection so results are never mistaken for a quote. */
+  function renderProjectionNote(m) {
+    var s = m.s, weather = s.weatherMode === 'variable'
+      ? Search.WEATHER_YEARS + ' day-to-day variable Victoria weather years'
+      : 'seasonal-average Victoria weather';
+    U.$('projectionNote').innerHTML = '<b>Projection basis:</b> ' + weather +
+      ' · ' + s.autonomyDays + '-day ' + m.target.season.name.toLowerCase() +
+      ' battery-only backup target · ' + s.horizonYears + '-year cost period. ' +
+      'Installed costs are CAD, include the modelled GST/PST, and exclude rebates. Numbered dots under the System sliders show where these tiers sit. Equipment prices, site fit, shading, permits and final electrical design still need installer validation.';
+  }
 
   /**
    * The full model of a tier's design, in the weather year the other tabs
@@ -96,7 +115,7 @@
       '</dl>' +
       '<p class="tier-parts">' + d.panels + ' panels · ' + d.batteries + ' batteries · ' + d.inverters + ' inverters</p>' +
       (on ? '<p class="tier-inuse">✓ In use</p>'
-          : '<button class="btn" type="button" data-panels="' + d.panels + '" data-batteries="' + d.batteries + '">Use this tier</button>') +
+          : '<button class="btn" type="button" data-panels="' + d.panels + '" data-batteries="' + d.batteries + '">Use this tier in System</button>') +
       '</article>';
   }
 
