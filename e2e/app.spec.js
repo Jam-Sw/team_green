@@ -95,6 +95,8 @@ test('optimizer maps every design, and a square loads that design', async ({ pag
 
 test('suggestions: every tier passes, sets the sliders, and matches the budget', async ({ page }) => {
   await page.goto('./#suggestions');
+  await expect(page.locator('#projectionFlow')).toContainText('Test every acceptable mix');
+  await expect(page.locator('#projectionNote')).toContainText('include the modelled GST/PST, and exclude rebates');
   const tiers = page.locator('#tiers .tier');
   await expect(tiers.first()).toBeVisible({ timeout: 110000 });
   expect(await tiers.count()).toBeGreaterThanOrEqual(3);

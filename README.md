@@ -10,11 +10,11 @@ The architecture follows [`shubin123/drippage`](https://github.com/shubin123/dri
 
 ```bash
 python3 -m http.server 8000     # then open http://localhost:8000
-node tests/run-tests.js         # 52 tests: physics, datasheet rules, budget
+node tests/run-tests.js         # 53 tests: physics, datasheet rules, budget
 node tools/report.js            # regenerate docs/BUDGET_VICTORIA.md
 
 npm install && npx playwright install chromium
-npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 11 browser tests
+npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 12 browser tests
 E2E_BASE_URL=https://jam-sw.github.io/team_green/ npm run test:e2e:live   # same tests on the live site
 ```
 
@@ -34,7 +34,7 @@ GitHub Pages publishes `main` from the repository root at https://jam-sw.github.
 | Winter backup, no generator | 9+ days at average sun (target: 3) |
 | Generator | ≈ 800–1,000 kWh/yr; forecast-aware dispatch ≈ 22 % cheaper than an SOC trigger |
 
-The optimizer puts this design within 0.3 % of the lowest 25-year lifecycle cost, at $44k less capital than the absolute optimum (120 panels / 7 batteries / 3 inverters).
+For the challenge inputs and stated assumptions, the optimizer selects this design as the lowest projected 25-year cost. Dollar figures are CAD estimates, include modelled GST/PST where stated, exclude rebates, and require an installer quote and site validation.
 
 ## What's in the app
 
@@ -43,9 +43,10 @@ Every tab opens with one sentence saying what it shows, and every chart has a ca
 | Tab | Contents |
 |---|---|
 | **Overview** | One-sentence verdict, headline numbers, parts list with the rule behind each count, requirement checklist (FR-1…FR-10), blueprint single-line diagram explained in six steps, string sizing |
+| **Suggestions** | Transparent local projection: four acceptable tiers, what each trades off, settings markers, and one-click application to System |
 | **Energy** | Average day by season (where each hour's power comes from), battery level, month by month, every hour of the year, backup days with no generator |
 | **Generator** | The automation in three steps (read → decide → act), forecast-aware vs. a battery-level rule over 20 weather years, generator cost by year |
-| **Optimizer** | 25-year cost of every panel × battery mix; a shortlist of four picks; click any square to load that design |
+| **Optimizer** | 25-year cost of every panel × battery mix; numbered Suggestions tiers; click any square to load that design |
 | **Budget** | Installed cost by category with all line items on request (permits, PST/GST, labour), CSV export, running cost by year, BC Hydro comparison |
 | **Assumptions** | Model and budget assumptions, a glossary of terms, and sources |
 
@@ -68,8 +69,8 @@ settings ──► model ──► tabs
 | `settings.js` | Parameter schema (drives the control panel) and persistence |
 | `app.js` | Wires settings → model → tabs; tab routing |
 | `ui/ui.js` | Formatting, card/table/KPI builders, tab registry |
-| `ui/model.js`, `ui/controls.js`, `ui/sld.js` | Model, settings panel, single-line diagram |
-| `ui/tabs/*.js` | Overview, Energy, Generator, Optimizer, Budget, Assumptions |
+| `ui/model.js`, `ui/controls.js`, `ui/search.js`, `ui/sld.js` | Model, settings panel, local design search, single-line diagram |
+| `ui/tabs/*.js` | Overview, Suggestions, Energy, Generator, Optimizer, Budget, Assumptions |
 | `charts.js`, `styles.css`, `index.html` | SVG charts, styles (light + dark), page shell |
 | `tests/` | `run-tests.js` (Node) and `index.html` (browser) |
 | `e2e/`, `playwright.config.js` | Browser tests against the Pages-style build |

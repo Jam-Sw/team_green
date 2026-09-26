@@ -102,34 +102,34 @@
 | Year | Gen kWh | Generator | Services | Gen. replaced | O&M | Standby utility | Replacements | Total |
 |---:|---:|---:|---:|:---:|---:|---:|---:|---:|
 | 1 | 1033 | $4,877 | 10 |  | $300 | $78 | $0 | $5,255 |
-| 2 | 1034 | $8,790 | 10 | yes | $306 | $79 | $0 | $9,175 |
-| 3 | 1035 | $5,497 | 11 |  | $312 | $81 | $0 | $5,890 |
-| 4 | 1035 | $9,063 | 10 | yes | $318 | $83 | $0 | $9,464 |
-| 5 | 1036 | $5,518 | 10 |  | $325 | $84 | $0 | $5,927 |
-| 6 | 1045 | $9,687 | 11 | yes | $331 | $86 | $0 | $10,104 |
-| 7 | 1054 | $9,811 | 10 | yes | $338 | $88 | $0 | $10,236 |
-| 8 | 1063 | $6,049 | 11 |  | $345 | $89 | $0 | $6,483 |
-| 9 | 1072 | $10,493 | 11 | yes | $351 | $91 | $0 | $10,935 |
-| 10 | 1081 | $6,147 | 10 |  | $359 | $93 | $0 | $6,598 |
-| 11 | 1090 | $10,832 | 11 | yes | $366 | $95 | $0 | $11,293 |
-| 12 | 1099 | $11,309 | 11 | yes | $373 | $97 | $0 | $11,779 |
-| 13 | 1107 | $6,797 | 11 |  | $380 | $99 | $17,977 | $25,253 |
-| 14 | 1114 | $11,664 | 11 | yes | $388 | $101 | $0 | $12,153 |
-| 15 | 1121 | $7,750 | 12 |  | $396 | $103 | $0 | $8,249 |
-| 16 | 1128 | $12,007 | 11 | yes | $404 | $105 | $43,661 | $56,177 |
-| 17 | 1135 | $12,511 | 11 | yes | $412 | $107 | $0 | $13,030 |
-| 18 | 1139 | $8,141 | 12 |  | $420 | $109 | $0 | $8,670 |
-| 19 | 1142 | $12,862 | 11 | yes | $428 | $111 | $0 | $13,401 |
-| 20 | 1146 | $13,808 | 12 | yes | $437 | $113 | $0 | $14,358 |
-| 21 | 1150 | $8,117 | 11 |  | $446 | $116 | $0 | $8,678 |
-| 22 | 1158 | $14,213 | 12 | yes | $455 | $118 | $0 | $14,786 |
-| 23 | 1167 | $8,866 | 11 |  | $464 | $120 | $0 | $9,450 |
-| 24 | 1175 | $14,619 | 12 | yes | $473 | $123 | $0 | $15,214 |
-| 25 | 1183 | $15,198 | 12 | yes | $483 | $125 | $0 | $15,805 |
+| 2 | 1040 | $8,800 | 10 | yes | $306 | $79 | $0 | $9,185 |
+| 3 | 1046 | $5,524 | 11 |  | $312 | $81 | $0 | $5,917 |
+| 4 | 1052 | $9,090 | 10 | yes | $318 | $83 | $0 | $9,491 |
+| 5 | 1058 | $5,913 | 11 |  | $325 | $84 | $0 | $6,322 |
+| 6 | 1065 | $9,378 | 10 | yes | $331 | $86 | $0 | $9,795 |
+| 7 | 1071 | $10,157 | 11 | yes | $338 | $88 | $0 | $10,583 |
+| 8 | 1077 | $6,125 | 11 |  | $345 | $89 | $0 | $6,558 |
+| 9 | 1083 | $10,481 | 11 | yes | $351 | $91 | $0 | $10,923 |
+| 10 | 1090 | $6,589 | 11 |  | $359 | $93 | $0 | $7,040 |
+| 11 | 1096 | $10,801 | 11 | yes | $366 | $95 | $0 | $11,261 |
+| 12 | 1102 | $11,275 | 11 | yes | $373 | $97 | $0 | $11,745 |
+| 13 | 1108 | $6,871 | 11 |  | $380 | $99 | $17,977 | $25,328 |
+| 14 | 1115 | $11,618 | 11 | yes | $388 | $101 | $0 | $12,106 |
+| 15 | 1121 | $7,437 | 11 |  | $396 | $103 | $0 | $7,935 |
+| 16 | 1127 | $11,952 | 11 | yes | $404 | $105 | $43,661 | $56,121 |
+| 17 | 1133 | $12,874 | 12 | yes | $412 | $107 | $0 | $13,392 |
+| 18 | 1140 | $7,809 | 11 |  | $420 | $109 | $0 | $8,338 |
+| 19 | 1146 | $13,247 | 12 | yes | $428 | $111 | $0 | $13,786 |
+| 20 | 1152 | $13,339 | 11 | yes | $437 | $113 | $0 | $13,889 |
+| 21 | 1158 | $8,684 | 12 |  | $446 | $116 | $0 | $9,245 |
+| 22 | 1165 | $13,717 | 11 | yes | $455 | $118 | $0 | $14,290 |
+| 23 | 1171 | $14,713 | 12 | yes | $464 | $120 | $0 | $15,297 |
+| 24 | 1177 | $9,203 | 12 |  | $473 | $123 | $0 | $9,799 |
+| 25 | 1183 | $15,132 | 12 | yes | $483 | $125 | $0 | $15,740 |
 
 - Capital: **$162,752**
-- NPV of operating costs: **$185,454** ($318,364 nominal)
-- **Lifecycle cost (NPV): $348,207**
+- NPV of operating costs: **$186,237** ($319,342 nominal)
+- **Lifecycle cost (NPV): $348,989**
 
 Generator model: $1.65/kWh ÷ current efficiency, $300 service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement ($3,500, assumption) once efficiency falls below 70 %.
 
@@ -146,12 +146,12 @@ Forecast-aware dispatch saves **$1,052/yr (22 %)** on this design. It only charg
 
 | Alternative | Panels | Batteries | Inverters | Capex | Gen kWh/yr | Opex yr 1 | Lifecycle NPV |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Lowest lifecycle cost | 120 | 7 | 3 | $206,974 | 576 | $2,876 | $338,920 |
-| **Recommended** — lowest capex within 2 % of optimum | 92 | 5 | 2 | $162,752 | 1033 | $5,255 | $339,925 |
-| Lowest capex that meets requirements | 60 | 5 | 2 | $140,218 | 1749 | $8,904 | $412,431 |
-| Least generator use | 120 | 16 | 3 | $275,175 | 408 | $2,273 | $425,265 |
+| Lowest lifecycle cost | 92 | 5 | 2 | $162,752 | 1033 | $5,255 | $348,989 |
+| **Recommended** — lowest capex within 2 % of optimum | 88 | 5 | 2 | $160,024 | 1106 | $5,702 | $355,830 |
+| Lowest capex that meets requirements | 60 | 5 | 2 | $140,218 | 1749 | $8,904 | $424,648 |
+| Least generator use | 120 | 16 | 3 | $275,175 | 408 | $2,273 | $431,818 |
 
-298 candidates simulated (268 feasible). Near the optimum the lifecycle-cost surface is flat. The recommended design comes within 0.3 % of the lowest lifecycle cost while needing $44,221 less capital and 1 fewer inverter(s). The cheapest compliant build saves $22,534 up front but costs $72,505 more over its life, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
+298 candidates simulated (268 feasible). Near the optimum the lifecycle-cost surface is flat. The recommended design comes within 2.0 % of the lowest lifecycle cost while needing $2,729 less capital. The cheapest compliant build saves $19,806 up front but costs $68,818 more over its life, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
 
 ## 6. Context — the same load on BC Hydro
 

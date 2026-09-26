@@ -221,6 +221,13 @@ details.more[open] > summary::after { content: "Hide"; }
 .searching .muted { margin: 0; }
 td.on, th.on { background: var(--accent-soft); }
 
+/* Suggestions: the transparent local projection, before the tier cards. */
+.projection-flow { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; counter-reset: flow; }
+.projection-flow li { padding: 10px 12px; background: var(--sunken); border-radius: 8px; font-size: .85rem; color: var(--text-2); }
+.projection-flow b, .projection-flow span { display: block; }
+.projection-flow b { color: var(--text); margin-bottom: 3px; }
+.projection-note { margin-top: 12px; color: var(--text-3); font-size: .8rem; max-width: 95ch; }
+
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .step { background: var(--sunken); border-radius: 8px; padding: 12px 14px; font-size: .86rem; color: var(--text-2); }
 .step h4 { margin: 4px 0 6px !important; color: var(--text) !important; font-size: .88rem !important; }
@@ -369,7 +376,7 @@ tr.best td { background: var(--accent-soft); }
     transform: translateX(-100%); transition: transform .2s ease;
   }
   body.settings-open .control-panel { transform: none; box-shadow: 0 0 40px rgba(0, 0, 0, .2); }
-  .grid-2, .steps, .terms { grid-template-columns: minmax(0, 1fr); }
+  .grid-2, .steps, .terms, .projection-flow { grid-template-columns: minmax(0, 1fr); }
   td.nowrap { white-space: normal; }
   .terms dd { margin-bottom: 6px; }
   .bp-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
