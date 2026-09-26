@@ -153,3 +153,19 @@ TestRunner.suite('Settings', function () {
     assert.equal(d.genServiceCost, 300, '$300/service');
   });
 });
+
+TestRunner.suite('Design search over several weather years', function () {
+  TestRunner.test('evaluateYears averages the years and keeps the worst', function (assert) {
+    var s = SunSettings.defaults(), seeds = [1, 2, 3];
+    var one = seeds.map(function (seed) {
+      return SunEngine.evaluate(Object.assign({}, s, { weatherMode: 'variable', weatherSeed: seed }), SunBudget.costFn, 92, 5);
+    });
+    var r = SunEngine.evaluateYears(s, SunBudget.costFn, 92, 5, seeds);
+    var mean = one.reduce(function (a, x) { return a + x.lifecycle; }, 0) / 3;
+    assert.approxEqual(r.lifecycle, mean, 1e-6, 'lifecycle is the average of the years');
+    assert.approxEqual(r.worstLifecycle, Math.max.apply(null, one.map(function (x) { return x.lifecycle; })), 1e-6, 'worst year kept');
+    assert.equal(r.capex, one[0].capex, 'installed cost does not depend on the weather');
+    assert.equal(r.feasible, one.every(function (x) { return x.feasible; }), 'feasible only if every year is');
+    assert.equal(r.years, 3, 'three years');
+  });
+});

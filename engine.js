@@ -370,19 +370,20 @@
   }
 
   /**
-   * Lowest stored energy over the look-ahead window if the generator stays
-   * off, using forecast PV. Used by the forecast-aware dispatch.
+   * Whether stored energy falls below `below` at any point in the look-ahead
+   * window if the generator stays off, using forecast PV. Used by the
+   * forecast-aware dispatch. Stops at the first dip, since that settles it.
    */
-  function forecastMinSoc(soc, t, series, fcst, L) {
-    var min = soc;
+  function forecastDips(soc, t, series, fcst, L, below) {
+    if (soc < below) return true;
     var end = Math.min(HOURS_PER_YEAR, t + LOOKAHEAD_H);
     for (var k = t; k < end; k++) {
       var day = (k / 24) | 0;
       var r = stepNoGen(soc, series.load[k], series.pv[k] * fcst[day], L);
       soc = r.soc - r.unmet / EQ.inverter.effBatteryToLoad; // debt below floor
-      if (soc < min) min = soc;
+      if (soc < below) return true;
     }
-    return min;
+    return false;
   }
 
   /** Fresh generator state. */
@@ -484,14 +485,15 @@
         if (running && runFor >= minRun && soc >= stopE) running = false;
       } else {
         if (!running) {
+          // Start when load would go unserved, or when the forecast says the
+          // battery will dip below its reserve and the shortfall is imminent
+          // (next few hours): a later start gives real sun more chance to
+          // beat the forecast. The cheap imminence test goes first.
           if (r.unmet > 1e-9 ||
-              forecastMinSoc(soc, t, series, fcst, L) < L.floor + reserve) {
-            // Only start once the shortfall is imminent (next few hours):
-            // later start = more chance real sun beats the forecast.
-            if (r.unmet > 1e-9 || r.soc < L.floor + reserve + genKw) running = true;
+              (r.soc < L.floor + reserve + genKw && forecastDips(soc, t, series, fcst, L, L.floor + reserve))) {
+            running = true;
           }
-        } else if (runFor >= minRun &&
-                   forecastMinSoc(soc, t, series, fcst, L) >= L.floor + reserve) {
+        } else if (runFor >= minRun && !forecastDips(soc, t, series, fcst, L, L.floor + reserve)) {
           running = false;
         }
       }
@@ -690,6 +692,28 @@
     };
   }
 
+  /**
+   * Simulate and cost one candidate in each of several weather years
+   * (seeds for the day-to-day weather). One year can flatter or punish a
+   * design, so the search ranks on the average and the worst year.
+   * Feasible only if it serves every hour in every year.
+   */
+  function evaluateYears(s, costFn, panels, batteries, seeds) {
+    var rows = seeds.map(function (seed) {
+      return evaluate(Object.assign({}, s, { weatherMode: 'variable', weatherSeed: seed }), costFn, panels, batteries);
+    });
+    function mean(k) { return rows.reduce(function (a, r) { return a + r[k]; }, 0) / rows.length; }
+    var r0 = rows[0];
+    return {
+      panels: r0.panels, batteries: r0.batteries, inverters: r0.inverters, gridboss: r0.gridboss,
+      autonomyDays: r0.autonomyDays, capex: r0.capex,
+      feasible: rows.every(function (r) { return r.feasible; }),
+      genKwh: mean('genKwh'), annualOpex: mean('annualOpex'), lifecycle: mean('lifecycle'),
+      worstLifecycle: Math.max.apply(null, rows.map(function (r) { return r.lifecycle; })),
+      years: rows.length
+    };
+  }
+
   return Object.freeze({
     HOURS_PER_YEAR: HOURS_PER_YEAR,
     LOAD_SHAPE: LOAD_SHAPE,
@@ -720,6 +744,7 @@
     lifecycleEnergy: lifecycleEnergy,
     optimize: optimize,
     optimizerGrid: optimizerGrid,
-    evaluate: evaluate
+    evaluate: evaluate,
+    evaluateYears: evaluateYears
   });
 }));

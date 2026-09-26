@@ -15,16 +15,16 @@
 | 200 A panel | 2 | One per GridBOSS load output |
 | BE7500ID 6 kW generator | 1 (existing) | Moved to GridBOSS GEN port with 2-wire auto-start |
 
-### Performance (year 1, day-to-day variable weather, seed 7)
+### Performance (year 1, day-to-day weather, weather year 14)
 
 | Metric | Value |
 |---|---:|
 | Annual load incl. inverter idle + battery heaters | 12,945 kWh |
 | PV production (DC) | 45,221 kWh |
-| Solar share of load | 92.7 % |
-| Generator energy | 1,033 kWh (31 starts, 181 h) |
-| Generator cost (fuel + service) | $4,877 |
-| Curtailed PV (zero export) | 32,343 kWh |
+| Solar share of load | 94.3 % |
+| Generator energy | 815 kWh (27 starts, 136 h) |
+| Generator cost (fuel + service) | $3,847 |
+| Curtailed PV (zero export) | 32,121 kWh |
 | Unserved energy | 0 kWh |
 | Winter backup, no generator (average sun / zero sun) | 9.3 days / 1.3 days |
 | Spring backup, no generator (average sun / zero sun) | 14+ days / 1.7 days |
@@ -101,35 +101,35 @@
 
 | Year | Gen kWh | Generator | Services | Gen. replaced | O&M | Standby utility | Replacements | Total |
 |---:|---:|---:|---:|:---:|---:|---:|---:|---:|
-| 1 | 1033 | $4,877 | 10 |  | $300 | $78 | $0 | $5,255 |
-| 2 | 1034 | $8,790 | 10 | yes | $306 | $79 | $0 | $9,175 |
-| 3 | 1035 | $5,497 | 11 |  | $312 | $81 | $0 | $5,890 |
-| 4 | 1035 | $9,063 | 10 | yes | $318 | $83 | $0 | $9,464 |
-| 5 | 1036 | $5,518 | 10 |  | $325 | $84 | $0 | $5,927 |
-| 6 | 1045 | $9,687 | 11 | yes | $331 | $86 | $0 | $10,104 |
-| 7 | 1054 | $9,811 | 10 | yes | $338 | $88 | $0 | $10,236 |
-| 8 | 1063 | $6,049 | 11 |  | $345 | $89 | $0 | $6,483 |
-| 9 | 1072 | $10,493 | 11 | yes | $351 | $91 | $0 | $10,935 |
-| 10 | 1081 | $6,147 | 10 |  | $359 | $93 | $0 | $6,598 |
-| 11 | 1090 | $10,832 | 11 | yes | $366 | $95 | $0 | $11,293 |
-| 12 | 1099 | $11,309 | 11 | yes | $373 | $97 | $0 | $11,779 |
-| 13 | 1107 | $6,797 | 11 |  | $380 | $99 | $17,977 | $25,253 |
-| 14 | 1114 | $11,664 | 11 | yes | $388 | $101 | $0 | $12,153 |
-| 15 | 1121 | $7,750 | 12 |  | $396 | $103 | $0 | $8,249 |
-| 16 | 1128 | $12,007 | 11 | yes | $404 | $105 | $43,661 | $56,177 |
-| 17 | 1135 | $12,511 | 11 | yes | $412 | $107 | $0 | $13,030 |
-| 18 | 1139 | $8,141 | 12 |  | $420 | $109 | $0 | $8,670 |
-| 19 | 1142 | $12,862 | 11 | yes | $428 | $111 | $0 | $13,401 |
-| 20 | 1146 | $13,808 | 12 | yes | $437 | $113 | $0 | $14,358 |
-| 21 | 1150 | $8,117 | 11 |  | $446 | $116 | $0 | $8,678 |
-| 22 | 1158 | $14,213 | 12 | yes | $455 | $118 | $0 | $14,786 |
-| 23 | 1167 | $8,866 | 11 |  | $464 | $120 | $0 | $9,450 |
-| 24 | 1175 | $14,619 | 12 | yes | $473 | $123 | $0 | $15,214 |
-| 25 | 1183 | $15,198 | 12 | yes | $483 | $125 | $0 | $15,805 |
+| 1 | 815 | $3,847 | 8 |  | $300 | $78 | $0 | $4,225 |
+| 2 | 823 | $4,207 | 8 |  | $306 | $79 | $0 | $4,592 |
+| 3 | 831 | $7,745 | 8 | yes | $312 | $81 | $0 | $8,138 |
+| 4 | 839 | $4,679 | 9 |  | $318 | $83 | $0 | $5,080 |
+| 5 | 847 | $8,146 | 8 | yes | $325 | $84 | $0 | $8,555 |
+| 6 | 855 | $4,864 | 9 |  | $331 | $86 | $0 | $5,281 |
+| 7 | 863 | $8,550 | 8 | yes | $338 | $88 | $0 | $8,975 |
+| 8 | 871 | $5,068 | 9 |  | $345 | $89 | $0 | $5,502 |
+| 9 | 879 | $9,309 | 9 | yes | $351 | $91 | $0 | $9,751 |
+| 10 | 887 | $5,293 | 9 |  | $359 | $93 | $0 | $5,744 |
+| 11 | 895 | $9,734 | 9 | yes | $366 | $95 | $0 | $10,195 |
+| 12 | 903 | $5,542 | 9 |  | $373 | $97 | $0 | $6,011 |
+| 13 | 911 | $10,165 | 9 | yes | $380 | $99 | $17,977 | $28,621 |
+| 14 | 919 | $5,817 | 9 |  | $388 | $101 | $0 | $6,305 |
+| 15 | 927 | $10,599 | 9 | yes | $396 | $103 | $0 | $11,097 |
+| 16 | 935 | $6,524 | 10 |  | $404 | $105 | $43,661 | $50,693 |
+| 17 | 943 | $11,038 | 9 | yes | $412 | $107 | $0 | $11,556 |
+| 18 | 951 | $6,458 | 9 |  | $420 | $109 | $0 | $6,987 |
+| 19 | 959 | $11,908 | 10 | yes | $428 | $111 | $0 | $12,447 |
+| 20 | 967 | $7,273 | 10 |  | $437 | $113 | $0 | $7,823 |
+| 21 | 975 | $11,922 | 9 | yes | $446 | $116 | $0 | $12,483 |
+| 22 | 983 | $7,712 | 10 |  | $455 | $118 | $0 | $8,284 |
+| 23 | 991 | $12,830 | 10 | yes | $464 | $120 | $0 | $13,414 |
+| 24 | 999 | $13,523 | 10 | yes | $473 | $123 | $0 | $14,119 |
+| 25 | 1007 | $7,864 | 10 |  | $483 | $125 | $0 | $8,472 |
 
 - Capital: **$162,752**
-- NPV of operating costs: **$185,454** ($318,364 nominal)
-- **Lifecycle cost (NPV): $348,207**
+- NPV of operating costs: **$159,061** ($274,354 nominal)
+- **Lifecycle cost (NPV): $321,813**
 
 Generator model: $1.65/kWh ÷ current efficiency, $300 service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement ($3,500, assumption) once efficiency falls below 70 %.
 
@@ -144,14 +144,16 @@ Forecast-aware dispatch saves **$1,052/yr (22 %)** on this design. It only charg
 
 ## 5. Design alternatives (optimizer)
 
-| Alternative | Panels | Batteries | Inverters | Capex | Gen kWh/yr | Opex yr 1 | Lifecycle NPV |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Lowest lifecycle cost | 120 | 7 | 3 | $206,974 | 576 | $2,876 | $338,920 |
-| **Recommended** — lowest capex within 2 % of optimum | 92 | 5 | 2 | $162,752 | 1033 | $5,255 | $339,925 |
-| Lowest capex that meets requirements | 60 | 5 | 2 | $140,218 | 1749 | $8,904 | $412,431 |
-| Least generator use | 120 | 16 | 3 | $275,175 | 408 | $2,273 | $425,265 |
+Every panels × batteries mix is simulated in each of 20 weather years and costed over 25 years (lifecycle NPV). One year can flatter or punish a design, so designs are compared on the average year and on the worst year. These are the tiers on the app's Suggestions tab.
 
-298 candidates simulated (268 feasible). Near the optimum the lifecycle-cost surface is flat. The recommended design comes within 0.3 % of the lowest lifecycle cost while needing $44,221 less capital and 1 fewer inverter(s). The cheapest compliant build saves $22,534 up front but costs $72,505 more over its life, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
+| Tier | Rule | Panels | Batteries | Inverters | Capex | Gen kWh/yr (avg) | Lifecycle NPV, average | Lifecycle NPV, worst year |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 1 · Essential | The lowest installed cost that meets every requirement. | 60 | 5 | 2 | $140,218 | 1833 | $441,181 | $466,736 |
+| **2 · Balanced (recommended)** | The lowest total cost in a bad weather year: installed plus running, in the worst of the simulated years. | 92 | 5 | 2 | $162,752 | 828 | $325,146 | $348,989 |
+| 3 · Independent | The least generator use within 2% of the lowest average total cost. | 120 | 7 | 3 | $206,974 | 347 | $316,894 | $349,947 |
+| 4 · Resilient | The least generator use of any design searched. | 120 | 16 | 3 | $275,175 | 129 | $396,790 | $431,818 |
+
+298 candidates simulated (268 meet every requirement in every year). Near the optimum the lifecycle-cost surface is flat. The cheapest design on average is 120 panels / 7 batteries / 3 inverters at $316,894. The recommended 92 / 5 / 2 averages 2.6 % more, but needs $44,221 less capital and 1 fewer inverter(s) and has the lowest worst-year cost of any design ($348,989 vs $349,947). The cheapest compliant build saves $22,534 up front but costs $116,035 more over its life on average, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
 
 ## 6. Context — the same load on BC Hydro
 

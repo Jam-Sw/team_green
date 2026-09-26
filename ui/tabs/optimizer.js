@@ -14,13 +14,15 @@
     id: 'optimizer',
     title: 'Optimizer',
     intro: function (m) {
-      return 'Every mix of panels and batteries, each simulated for a full year and costed over ' + m.d.horizonYears +
+      var years = m.s.weatherMode === 'variable' ? Search.WEATHER_YEARS + ' simulated weather years' : 'a full year';
+      return 'Every mix of panels and batteries, each simulated hour by hour over ' + years + ' and costed over ' + m.d.horizonYears +
         ' years: installed cost plus running costs, in today\'s dollars.';
     },
     html:
       U.card('Cost of every design',
-        U.caption('Each square is one design: panels across, batteries up. Lighter is cheaper; grey fails a requirement. ' +
-          'The outlined square is the cheapest, and the numbers mark the tiers on the Suggestions tab. Click any square to load it.') +
+        U.caption('Each square is one design: panels across, batteries up, coloured by its average total cost over the weather years. ' +
+          'Lighter is cheaper; grey fails a requirement. The outlined square is the cheapest on average, and the numbers mark the tiers ' +
+          'on the Suggestions tab (tier 2 is the recommendation). Click any square to load it.') +
         '<div id="heatmap" class="chart"></div><p class="muted" id="optNote"></p>',
         '<span class="progress" id="optProgress" hidden><span id="optBar"></span></span>'),
 
@@ -66,14 +68,15 @@
         var t = r.tiers.filter(function (k) { return k.row === x; })[0];
         return '<div class="tip-title">' + x.panels + ' panels · ' + x.batteries + ' batteries · ' + x.inverters + ' inverters</div>' +
           (t ? 'Tier ' + t.n + ' · ' + t.name + '<br>' : '') +
-          years + '-year cost <b>' + U.money(x.lifecycle) + '</b><br>Installed ' + U.money(x.capex) + '<br>Generator ' + U.kwh(x.genKwh) + ' a year' +
+          years + '-year cost <b>' + U.money(x.lifecycle) + '</b>' + (r.years > 1 ? ' on average, ' + U.money(x.worstLifecycle) + ' in the worst year' : '') +
+          '<br>Installed ' + U.money(x.capex) + '<br>Generator ' + U.kwh(x.genKwh) + ' a year' + (r.years > 1 ? ' on average' : '') +
           (x.feasible ? '' : '<br><b>Fails a requirement</b>');
       },
       onClick: function (i, j) { app.loadDesign(panels[j], bats[i]); }
     });
 
     U.$('optNote').textContent = r.best
-      ? r.near.length + ' designs cost within 2% of the cheapest. The bottom of the cost curve is flat, so budget, roof space and risk can decide between them.'
+      ? r.near.length + ' designs cost within 2% of the cheapest on average. The bottom of the cost curve is flat, so budget, roof space and risk can decide between them.'
       : 'No design meets every requirement within the site limit.';
   }
 })();

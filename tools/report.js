@@ -16,6 +16,7 @@ const D = require('../data.js');
 const E = require('../engine.js');
 const B = require('../budget.js');
 const S = require('../settings.js');
+const Search = require('../ui/search.js');
 
 const s = S.defaults();
 const d = E.buildDesign(s);
@@ -49,13 +50,13 @@ function strategyStats(strategy) {
 const smart = strategyStats('smart');
 const socS = strategyStats('soc');
 
-// ── Optimizer ───────────────────────────────────────────────────────────────
-const opt = E.optimize(s, B.costFn, { panelStep: 4, batteryMax: 16 });
-const feas = opt.rows.filter((r) => r.feasible);
-const minCap = feas.reduce((a, r) => (r.capex < a.capex ? r : a));
-const within = feas.filter((r) => r.lifecycle <= opt.best.lifecycle * 1.02);
-const leanest = within.reduce((a, r) => (r.capex < a.capex ? r : a));
-const minGen = feas.reduce((a, r) => (r.genKwh < a.genKwh ? r : a));
+// ── Optimizer: the same search and tier rules as the app (ui/search.js) ────
+const search = Search.run(s);
+const feas = search.rows.filter((r) => r.feasible);
+const tier = (id) => search.tiers.find((t) => t.id === id || t.also.includes(Search.TIERS.find((x) => x.id === id).rule));
+const rec = search.tiers.find((t) => t.recommended).row;
+const cheapestAvg = search.best;
+const minCap = tier('essential').row;
 
 // ── Document ────────────────────────────────────────────────────────────────
 w('# Off-Grid Solar + Battery System — High-Fidelity Budget, Victoria BC');
@@ -75,7 +76,7 @@ w('| Distribution splitter | 1 | Splits the 400 A service to two GridBOSS / 200 
 w(`| 200 A panel | ${Math.ceil(d.serviceA / 200)} | One per GridBOSS load output |`);
 w('| BE7500ID 6 kW generator | 1 (existing) | Moved to GridBOSS GEN port with 2-wire auto-start |');
 w();
-w('### Performance (year 1, day-to-day variable weather, seed ' + d.weatherSeed + ')');
+w('### Performance (year 1, day-to-day weather, weather year ' + d.weatherSeed + ')');
 w();
 w('| Metric | Value |');
 w('|---|---:|');
@@ -147,14 +148,24 @@ w(`Forecast-aware dispatch saves **${money(socS.costMean - smart.costMean)}/yr (
 w();
 w('## 5. Design alternatives (optimizer)');
 w();
-w('| Alternative | Panels | Batteries | Inverters | Capex | Gen kWh/yr | Opex yr 1 | Lifecycle NPV |');
-w('|---|---:|---:|---:|---:|---:|---:|---:|');
-[['Lowest lifecycle cost', opt.best], ['**Recommended** — lowest capex within 2 % of optimum', leanest],
- ['Lowest capex that meets requirements', minCap], ['Least generator use', minGen]].forEach(([name, r]) => {
-  w(`| ${name} | ${r.panels} | ${r.batteries} | ${r.inverters} | ${money(r.capex)} | ${Math.round(r.genKwh)} | ${money(r.annualOpex)} | ${money(r.lifecycle)} |`);
+w(`Every panels × batteries mix is simulated in each of ${search.years} weather years and costed over ${d.horizonYears} years (lifecycle NPV). One year can flatter or punish a design, so designs are compared on the average year and on the worst year. These are the tiers on the app's Suggestions tab.`);
+w();
+w('| Tier | Rule | Panels | Batteries | Inverters | Capex | Gen kWh/yr (avg) | Lifecycle NPV, average | Lifecycle NPV, worst year |');
+w('|---|---|---:|---:|---:|---:|---:|---:|---:|');
+search.tiers.forEach((t) => {
+  const r = t.row;
+  const name = t.recommended ? `**${t.n} · ${t.name} (recommended)**` : `${t.n} · ${t.name}`;
+  w(`| ${name} | ${[t.rule].concat(t.also).join(' Also: ')} | ${r.panels} | ${r.batteries} | ${r.inverters} | ${money(r.capex)} | ${Math.round(r.genKwh)} | ${money(r.lifecycle)} | ${money(r.worstLifecycle)} |`);
 });
 w();
-w(`${opt.rows.length} candidates simulated (${feas.length} feasible). Near the optimum the lifecycle-cost surface is flat. The recommended design comes within ${((leanest.lifecycle / opt.best.lifecycle - 1) * 100).toFixed(1)} % of the lowest lifecycle cost while needing ${money(opt.best.capex - leanest.capex)} less capital${opt.best.inverters > leanest.inverters ? ' and ' + (opt.best.inverters - leanest.inverters) + ' fewer inverter(s)' : ''}. The cheapest compliant build saves ${money(leanest.capex - minCap.capex)} up front but costs ${money(minCap.lifecycle - leanest.lifecycle)} more over its life, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).`);
+w(`${search.rows.length} candidates simulated (${feas.length} meet every requirement in every year). Near the optimum the lifecycle-cost surface is flat. ` +
+  (rec === cheapestAvg
+    ? 'The recommended design is also the cheapest on average. '
+    : `The cheapest design on average is ${cheapestAvg.panels} panels / ${cheapestAvg.batteries} batteries / ${cheapestAvg.inverters} inverters at ${money(cheapestAvg.lifecycle)}. ` +
+      `The recommended ${rec.panels} / ${rec.batteries} / ${rec.inverters} averages ${((rec.lifecycle / cheapestAvg.lifecycle - 1) * 100).toFixed(1)} % more, ` +
+      `but needs ${money(cheapestAvg.capex - rec.capex)} less capital${cheapestAvg.inverters > rec.inverters ? ' and ' + (cheapestAvg.inverters - rec.inverters) + ' fewer inverter(s)' : ''} ` +
+      `and has the lowest worst-year cost of any design (${money(rec.worstLifecycle)} vs ${money(cheapestAvg.worstLifecycle)}). `) +
+  `The cheapest compliant build saves ${money(rec.capex - minCap.capex)} up front but costs ${money(minCap.lifecycle - rec.lifecycle)} more over its life on average, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).`);
 w();
 w('## 6. Context — the same load on BC Hydro');
 w();

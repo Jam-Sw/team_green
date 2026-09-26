@@ -30,7 +30,7 @@ Design a solar + battery system from EG4 FlexBOSS21 inverters, EG4 280Ah All-Wea
 |---|---|---|
 | FR-14 | High-fidelity capital budget for the City of Victoria: equipment, balance of system, labour, permits, taxes, contingency | `budget.js` `capex()`, covering the City of Victoria electrical permit ($441 + 1.25 % over $20k), building permit ($100 + 1.40 %), BC PST per Bulletin 203 (batteries taxable, PV exempt), GST 5 %, island freight, WorkSafeBC access, CEC 64-218 rapid shutdown |
 | FR-15 | Operating and lifecycle cost: generator (with service, degradation, replacement), O&M, standby utility, inverter and battery replacement, discounted to NPV | `budget.js` `lifecycle()`; `engine.js` `lifecycleEnergy()` (PV ageing 0.4 %/yr) |
-| FR-16 | Compare meaningful design alternatives and show how choices move capital vs operating cost | Optimizer heatmap (panels × batteries) and alternatives table; `docs/BUDGET_VICTORIA.md` §5 |
+| FR-16 | Compare meaningful design alternatives and show how choices move capital vs operating cost | Design search over 20 weather years (`ui/search.js`, `engine.js` `evaluateYears()`): Optimizer heatmap, Suggestions tiers (recommended = lowest worst-year lifecycle cost); `docs/BUDGET_VICTORIA.md` §5 |
 | FR-17 | State assumptions and sources | Assumptions tab; `data.js` `SOURCES` |
 | FR-18 | Exportable budget | CSV export (Budget tab); `node tools/report.js` → `docs/BUDGET_VICTORIA.md` |
 

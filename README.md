@@ -34,7 +34,7 @@ GitHub Pages publishes `main` from the repository root at https://jam-sw.github.
 | Winter backup, no generator | 9+ days at average sun (target: 3) |
 | Generator | ≈ 800–1,000 kWh/yr; forecast-aware dispatch ≈ 22 % cheaper than an SOC trigger |
 
-The optimizer puts this design within 0.3 % of the lowest 25-year lifecycle cost, at $44k less capital than the absolute optimum (120 panels / 7 batteries / 3 inverters).
+The optimizer runs every design through 20 simulated weather years. This design has the lowest 25-year cost in a bad weather year ($348,989 in its worst year). The cheapest design on average (120 panels / 7 batteries / 3 inverters) is 2.6 % cheaper on average but needs $44k more capital and a third inverter. The cost curve is flat near the bottom, so the design that holds up in a bad year and costs less up front is the safer buy.
 
 ## What's in the app
 

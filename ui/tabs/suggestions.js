@@ -48,11 +48,16 @@
     }
   });
 
-  /** The full model of a tier's design (cached per search). */
-  function modelOf(r, t) {
-    if (models.key !== r.key) models = { key: r.key, byTier: {} };
+  /**
+   * The full model of a tier's design, in the weather year the other tabs
+   * show (the search itself covers every year). Cached per search and year.
+   */
+  function modelOf(r, t, current) {
+    var k = r.key + '|' + current.s.weatherSeed;
+    if (models.key !== k) models = { key: k, byTier: {} };
     if (!models.byTier[t.id]) {
       models.byTier[t.id] = window.SunModel.build(Object.assign({}, r.settings, {
+        weatherSeed: current.s.weatherSeed,
         panels: t.row.panels, batteries: t.row.batteries, inverters: t.row.inverters
       }));
     }
@@ -68,9 +73,9 @@
       return;
     }
     var inUse = Search.tierOf(r, current.d);
-    var ms = r.tiers.map(function (t) { return modelOf(r, t); });
-    U.$('tiers').innerHTML = r.tiers.map(function (t, i) { return card(t, ms[i], t === inUse, t.row === r.best); }).join('');
-    U.$('tierTable').innerHTML = compare(r.tiers, ms, inUse);
+    var ms = r.tiers.map(function (t) { return modelOf(r, t, current); });
+    U.$('tiers').innerHTML = r.tiers.map(function (t, i) { return card(t, ms[i], t === inUse, t.recommended); }).join('');
+    U.$('tierTable').innerHTML = compare(r, ms, inUse);
   }
 
   function card(t, m, on, recommended) {
@@ -82,6 +87,10 @@
       '<p class="tier-price">' + U.money(m.cap.total) + '<span> installed</span></p>' +
       '<dl class="tier-facts">' +
         '<dt>' + d.horizonYears + '-year cost</dt><dd>' + U.money(m.life.lifecycle) + '</dd>' +
+        (t.row.years > 1
+          ? '<dt>Average of ' + t.row.years + ' years</dt><dd>' + U.money(t.row.lifecycle) + '</dd>' +
+            '<dt>Worst of ' + t.row.years + ' years</dt><dd>' + U.money(t.row.worstLifecycle) + '</dd>'
+          : '') +
         '<dt>Generator</dt><dd>' + U.kwh(m.T.gen) + '/yr</dd>' +
         '<dt>' + m.target.season.name + ' backup</dt><dd>' + window.SunModel.days(m.target.solar) + ' days</dd>' +
       '</dl>' +
@@ -92,8 +101,8 @@
   }
 
   /** Every number, one column per tier. */
-  function compare(tiers, ms, inUse) {
-    var d0 = ms[0].d, rows = [], classes = [];
+  function compare(r, ms, inUse) {
+    var tiers = r.tiers, d0 = ms[0].d, rows = [], classes = [];
     function section(name) { rows.push([name].concat(ms.map(function () { return ''; }))); classes.push('cat'); }
     function row(label, fn) { rows.push([label].concat(ms.map(fn))); classes.push(''); }
 
@@ -104,7 +113,11 @@
     section('Cost');
     row('Installed cost', function (m) { return U.money(m.cap.total); });
     row('Running cost, year 1', function (m) { return U.money(m.life.annualOpex); });
-    row(d0.horizonYears + '-year cost', function (m) { return U.money(m.life.lifecycle); });
+    row(d0.horizonYears + '-year cost' + (r.years > 1 ? ', weather year ' + d0.weatherSeed : ''), function (m) { return U.money(m.life.lifecycle); });
+    if (r.years > 1) {
+      row(d0.horizonYears + '-year cost, average of ' + r.years + ' years', function (m, i) { return U.money(tiers[i].row.lifecycle); });
+      row(d0.horizonYears + '-year cost, worst of ' + r.years + ' years', function (m, i) { return U.money(tiers[i].row.worstLifecycle); });
+    }
     section('Energy, per year');
     row('Solar share of the home', function (m) { return U.pct(m.T.solarFraction); });
     row('Generator', function (m) { return U.kwh(m.T.gen); });

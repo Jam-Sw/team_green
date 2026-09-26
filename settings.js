@@ -49,7 +49,7 @@
     // ── Solar & weather ─────────────────────────────────────────────────
     { key: 'pvDerate', group: 'solar', type: 'range', label: 'Panel output after losses', min: 0.7, max: 1, step: 0.01, def: 0.88, unit: '×', hint: 'Dirt, wiring and heat. 1.00 would mean no losses.' },
     { key: 'weatherMode', group: 'solar', type: 'choice', label: 'Weather', options: [{ v: 'average', t: 'Seasonal average' }, { v: 'variable', t: 'Day to day' }], def: 'variable' },
-    { key: 'weatherSeed', group: 'solar', type: 'range', label: 'Weather year', min: 1, max: 50, step: 1, def: 7, unit: '', hint: 'One of 50 simulated years (day-to-day weather only).' },
+    { key: 'weatherSeed', group: 'solar', type: 'range', label: 'Weather year', min: 1, max: 50, step: 1, def: 14, unit: '', hint: 'One of 50 simulated years (day-to-day weather only). Year 14 is a typical one: the middle of the first 20 for generator use.' },
     { key: 'designLowC', group: 'solar', type: 'range', label: 'Coldest morning', min: -30, max: 0, step: 0.5, def: -16, unit: '°C', hint: 'Limits how many panels fit in a string. Victoria\'s record low is −15 °C.' },
     { key: 'designHotCellC', group: 'solar', type: 'range', label: 'Hottest panel temperature', min: 40, max: 85, step: 1, def: 65, unit: '°C' },
 
