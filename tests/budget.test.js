@@ -141,6 +141,7 @@ TestRunner.suite('Budget-sensitive settings', function () {
   TestRunner.test('generator fuel, service and replacement settings reach the 25-year total', function (assert) {
     var base = projectedBudget();
     var fuel = projectedBudget({ genCostPerKwh: 3.00 });
+    var carbon = projectedBudget({ genCarbonPricePerKwh: 0.20 });
     var service = projectedBudget({ genServiceCost: 700 });
     var threshold = projectedBudget({ genReplaceAtEff: 0.90 });
     var replacement = projectedBudget({ genReplaceCost: 9000 });
@@ -148,6 +149,7 @@ TestRunner.suite('Budget-sensitive settings', function () {
 
     assert.approxEqual(fuel.cap.total, base.cap.total, 1e-6, 'fuel does not change installed cost');
     assert.isTrue(fuel.life.lifecycle > base.life.lifecycle, 'higher fuel cost increases lifecycle cost');
+    assert.isTrue(carbon.life.lifecycle > base.life.lifecycle, 'carbon-price add-on increases lifecycle cost');
     assert.isTrue(service.life.lifecycle > base.life.lifecycle, 'higher service cost increases lifecycle cost');
     assert.isTrue(threshold.life.lifecycle > base.life.lifecycle, 'earlier generator replacement increases lifecycle cost');
     assert.isTrue(replacement.life.lifecycle > base.life.lifecycle, 'higher replacement price increases lifecycle cost');
@@ -186,6 +188,7 @@ TestRunner.suite('Settings', function () {
     assert.equal(d.springBaseKwh, 30, '30 kWh/day');
     assert.equal(d.autonomyDays, 3, 'three days');
     assert.equal(d.genCostPerKwh, 1.65, '$1.65/kWh');
+    assert.equal(d.genCarbonPricePerKwh, 0, 'no current consumer carbon charge');
     assert.equal(d.genServiceCost, 300, '$300/service');
   });
 });

@@ -10,7 +10,7 @@ The architecture follows [`shubin123/drippage`](https://github.com/shubin123/dri
 
 ```bash
 python3 -m http.server 8000     # then open http://localhost:8000
-node tests/run-tests.js         # 58 tests: physics, datasheet rules, budget
+node tests/run-tests.js         # 59 tests: physics, datasheet rules, budget
 node tools/report.js            # regenerate docs/BUDGET_VICTORIA.md
 
 npm install && npx playwright install chromium

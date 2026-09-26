@@ -28,7 +28,7 @@
           'Seasons: winter Dec–Feb, spring Mar–May, summer Jun–Aug, fall Sep–Nov. "Day to day" weather varies the sun each day but keeps each season\'s average.',
           'Inverter efficiency: solar → home 97%, solar → battery 94.5%, battery → home 94%, generator → battery 94%. Each inverter passes at most 16 kW of solar and 12 kW from the battery.',
           'The battery is used between ' + d.minSocPct + '% and 100%. Each year is simulated twice, so 1 January starts from a realistic level.',
-          'Generator: $' + d.genCostPerKwh.toFixed(2) + ' per kWh ÷ efficiency, a $' + d.genServiceCost + ' service every 100 kWh, 2% efficiency lost per service, replaced at ' + Math.round(d.genReplaceAtEff * 100) + '% for ' + U.money(d.genReplaceCost) + '.',
+          'Generator: $' + d.genCostPerKwh.toFixed(2) + ' fuel per kWh ÷ efficiency plus a $' + d.genCarbonPricePerKwh.toFixed(2) + ' per-kWh carbon-price add-on, a $' + d.genServiceCost + ' service every 100 kWh, 2% efficiency lost per service, replaced at ' + Math.round(d.genReplaceAtEff * 100) + '% for ' + U.money(d.genReplaceCost) + '.',
           'Backup test: full battery at midnight, average ' + m.target.season.name.toLowerCase() + ' sun, no generator, for ' + d.autonomyDays + ' days.',
           'This is completely off-grid: there is no utility connection. Surplus solar is turned down once the batteries are full.'
         ]) + '</div>') +

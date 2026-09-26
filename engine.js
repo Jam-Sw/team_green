@@ -394,7 +394,9 @@
 
   /**
    * Book generator production against its service/degradation schedule.
-   * Fuel cost per kWh rises as efficiency falls: $1.65 / efficiency.
+   * Fuel cost per kWh rises as efficiency falls: $1.65 / efficiency. An
+   * optional carbon-price add-on is expressed per delivered generator kWh so
+   * it can be modelled transparently without assuming a fuel burn rate.
    * Returns the cost of this energy (fuel + any services it triggers).
    */
   function runGenerator(gen, kwh, s) {
@@ -403,7 +405,7 @@
     var remaining = kwh;
     while (remaining > 1e-12) {
       var chunk = Math.min(remaining, G.serviceIntervalKwh - gen.kwhSinceService);
-      cost += chunk * s.genCostPerKwh / gen.efficiency;
+      cost += chunk * (s.genCostPerKwh / gen.efficiency + (s.genCarbonPricePerKwh || 0));
       gen.kwhSinceService += chunk;
       gen.lifetimeKwh += chunk;
       remaining -= chunk;

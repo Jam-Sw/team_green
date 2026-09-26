@@ -171,12 +171,18 @@ test('generator and cost settings update the budget totals', async ({ page }) =>
   await expect(lifecycle).not.toHaveText(lifecycleBefore);
   await expect(installed).toHaveText(installedBefore);
 
-  // Electrician labour is an installed cost, so both totals must update.
+  // Carbon pricing is a separate generator operating-cost input.
   const lifecycleAfterFuel = await lifecycle.textContent();
+  await page.locator('#ctl-genCarbonPricePerKwh').fill('0.2');
+  await expect(lifecycle).not.toHaveText(lifecycleAfterFuel);
+  await expect(installed).toHaveText(installedBefore);
+
+  // Electrician labour is an installed cost, so both totals must update.
+  const lifecycleAfterCarbon = await lifecycle.textContent();
   await page.locator('#controlPanel details.ctl-group').nth(5).evaluate((el) => { el.open = true; });
   await page.locator('#ctl-electricianRate').fill('200');
   await expect(installed).not.toHaveText(installedBefore);
-  await expect(lifecycle).not.toHaveText(lifecycleAfterFuel);
+  await expect(lifecycle).not.toHaveText(lifecycleAfterCarbon);
 });
 
 test('in-browser unit test page passes', async ({ page }) => {

@@ -202,6 +202,7 @@
     { id: 'vicfees', label: 'City of Victoria permits & inspections fees', url: 'https://www.victoria.ca/media/file/permits-and-inspections-fees-and-deposits' },
     { id: 'pst203', label: 'BC PST Bulletin 203 — Energy, Energy Conservation', url: 'https://www2.gov.bc.ca/assets/gov/taxes/sales-taxes/publications/pst-203-energy-conservation-ice-fund-tax.pdf' },
     { id: 'bchydro', label: 'BC Hydro Electric Tariff (1 Apr 2026)', url: 'https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/tariff-filings/electric-tariff/bchydro-electric-tariff.pdf' },
+    { id: 'carbon', label: 'BC carbon-tax rates and elimination notice', url: 'https://www2.gov.bc.ca/gov/content/taxes/sales-taxes/motor-fuel-carbon-tax/publications/motor-fuel-tax-and-carbon-tax-rates' },
     { id: 'climate', label: 'Victoria historical extreme minimum temperature', url: 'https://victoria.weatherstats.ca/metrics/extreme_min_temperature.html' }
   ];
 

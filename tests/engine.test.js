@@ -205,7 +205,7 @@ TestRunner.suite('Dispatch physics', function () {
 });
 
 TestRunner.suite('Generator accounting', function () {
-  var s = { genCostPerKwh: 1.65, genServiceCost: 300, genReplaceAtEff: 0.7, genReplaceCost: 3500 };
+  var s = { genCostPerKwh: 1.65, genCarbonPricePerKwh: 0, genServiceCost: 300, genReplaceAtEff: 0.7, genReplaceCost: 3500 };
 
   TestRunner.test('first 100 kWh: $165 energy + $300 service', function (assert) {
     var g = SunEngine.newGenerator();
@@ -239,6 +239,13 @@ TestRunner.suite('Generator accounting', function () {
   TestRunner.test('lifecycle years carry service state', function (assert) {
     var rows = SunEngine.generatorCostByYear([150, 150], Object.assign({ escalationPct: 0 }, s));
     assert.equal(rows[0].services + rows[1].services, 3, '300 kWh → 3 services over two years');
+  });
+
+  TestRunner.test('carbon-price add-on reaches each generator kWh', function (assert) {
+    var g = SunEngine.newGenerator();
+    var withCarbon = Object.assign({}, s, { genCarbonPricePerKwh: 0.20 });
+    assert.approxEqual(SunEngine.runGenerator(g, 50, withCarbon), 50 * (1.65 + 0.20), 1e-9,
+      'carbon add-on is included in generator operating cost');
   });
 });
 

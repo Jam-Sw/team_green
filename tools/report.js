@@ -91,7 +91,7 @@ w(`| Annual load incl. inverter idle + battery heaters | ${kwh(T.load)} |`);
 w(`| PV production (DC) | ${kwh(T.pv)} |`);
 w(`| Solar share of load | ${(T.solarFraction * 100).toFixed(1)} % |`);
 w(`| Generator energy | ${kwh(T.gen)} (${T.genStarts} starts, ${T.genHours} h) |`);
-w(`| Generator cost (fuel + service) | ${money(T.genCost)} |`);
+w(`| Generator cost (fuel + carbon-price add-on + service) | ${money(T.genCost)} |`);
 w(`| Curtailed PV (zero export) | ${kwh(T.curtailed)} |`);
 w(`| Unserved energy | ${kwh(T.unserved)} |`);
 D.SEASONS.forEach((se) => {
@@ -150,7 +150,7 @@ w(`- Capital: **${money(life.capex)}**`);
 w(`- NPV of operating costs: **${money(life.npvOpex)}** (${money(life.nominalOpex)} nominal)`);
 w(`- **Lifecycle cost (NPV): ${money(life.lifecycle)}**`);
 w();
-w('Generator model: $1.65/kWh ÷ current efficiency, $300 service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement (' + money(d.genReplaceCost) + ', assumption) once efficiency falls below ' + Math.round(d.genReplaceAtEff * 100) + ' %.');
+w('Generator model: ' + money(d.genCostPerKwh) + '/kWh ÷ current efficiency, plus ' + money(d.genCarbonPricePerKwh) + '/kWh carbon-price add-on, ' + money(d.genServiceCost) + ' service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement (' + money(d.genReplaceCost) + ', assumption) once efficiency falls below ' + Math.round(d.genReplaceAtEff * 100) + ' %. The carbon-price default is $0/kWh because BC eliminated its carbon tax and the federal consumer fuel charge ceased in 2025; it remains adjustable for a future charge or internal carbon value.');
 w();
 w('## 4. Generator automation — strategy comparison (20 weather years)');
 w();

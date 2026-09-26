@@ -33,7 +33,7 @@ This is an illustrative coincident-load schedule used to size the inverter minim
 | PV production (DC) | 45,221 kWh |
 | Solar share of load | 94.7 % |
 | Generator energy | 756 kWh (25 starts, 126 h) |
-| Generator cost (fuel + service) | $3,435 |
+| Generator cost (fuel + carbon-price add-on + service) | $3,435 |
 | Curtailed PV (zero export) | 32,117 kWh |
 | Unserved energy | 0 kWh |
 | Winter backup, no generator (average sun / zero sun) | 10.3 days / 1.3 days |
@@ -147,7 +147,7 @@ This is an illustrative coincident-load schedule used to size the inverter minim
 - NPV of operating costs: **$152,870** ($266,125 nominal)
 - **Lifecycle cost (NPV): $308,308**
 
-Generator model: $1.65/kWh ÷ current efficiency, $300 service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement ($3,500, assumption) once efficiency falls below 70 %.
+Generator model: $2/kWh ÷ current efficiency, plus $0/kWh carbon-price add-on, $300 service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement ($3,500, assumption) once efficiency falls below 70 %. The carbon-price default is $0/kWh because BC eliminated its carbon tax and the federal consumer fuel charge ceased in 2025; it remains adjustable for a future charge or internal carbon value.
 
 ## 4. Generator automation — strategy comparison (20 weather years)
 
@@ -185,4 +185,5 @@ Every panels × batteries mix is simulated in each of 20 weather years and coste
 - [City of Victoria permits & inspections fees](https://www.victoria.ca/media/file/permits-and-inspections-fees-and-deposits)
 - [BC PST Bulletin 203 — Energy, Energy Conservation](https://www2.gov.bc.ca/assets/gov/taxes/sales-taxes/publications/pst-203-energy-conservation-ice-fund-tax.pdf)
 - [BC Hydro Electric Tariff (1 Apr 2026)](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/tariff-filings/electric-tariff/bchydro-electric-tariff.pdf)
+- [BC carbon-tax rates and elimination notice](https://www2.gov.bc.ca/gov/content/taxes/sales-taxes/motor-fuel-carbon-tax/publications/motor-fuel-tax-and-carbon-tax-rates)
 - [Victoria historical extreme minimum temperature](https://victoria.weatherstats.ca/metrics/extreme_min_temperature.html)
