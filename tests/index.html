@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SunPage — Test Suite</title>
+    <style>
+        :root { --bg: #0f172a; --bg-card: #1e293b; --text: #f1f5f9; --text-muted: #94a3b8; --green: #22c55e; --red: #ef4444; --yellow: #eab308; --blue: #3b82f6; --border: #334155; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'SF Mono', Menlo, Consolas, monospace; background: var(--bg); color: var(--text); padding: 24px; line-height: 1.6; }
+        h1 { font-size: 1.5rem; margin-bottom: 8px; color: var(--yellow); }
+        .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+        #testResults { max-width: 900px; margin: 0 auto; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div id="testResults">
+        <h1>☀️ SunPage Test Suite</h1>
+        <p class="subtitle">Engine, string sizing, generator accounting, Victoria budget and settings. Running…</p>
+    </div>
+    <script src="../data.js"></script>
+    <script src="../engine.js"></script>
+    <script src="../budget.js"></script>
+    <script src="../settings.js"></script>
+    <script src="test-runner.js"></script>
+    <script src="engine.test.js"></script>
+    <script src="budget.test.js"></script>
+    <script>setTimeout(function () { TestRunner.run(); }, 10);</script>
+</body>
+</html>
