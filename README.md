@@ -14,7 +14,7 @@ node tests/run-tests.js         # 52 tests: physics, datasheet rules, budget
 node tools/report.js            # regenerate docs/BUDGET_VICTORIA.md
 
 npm install && npx playwright install chromium
-npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 7 browser tests
+npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 9 browser tests
 E2E_BASE_URL=https://jam-sw.github.io/team_green/ npm run test:e2e:live   # same tests on the live site
 ```
 
@@ -40,14 +40,23 @@ The optimizer puts this design within 0.3 % of the lowest 25-year lifecycle cost
 
 | Tab | Contents |
 |---|---|
-| **Overview** | KPIs, bill of materials with the rule behind each count, live requirement checklist (FR-1…FR-10), single-line diagram, Voc,max string sizing |
+| **Overview** | Headline numbers, parts list with the rule behind each count, requirement checklist (FR-1…FR-10), single-line diagram, string sizing |
 | **Energy** | Average day per season (solar / battery / generator vs load), battery SOC, monthly balance, 8,760-hour SOC trace, autonomy table |
-| **Generator** | The automation (inputs → decisions → actions), a 20-weather-year strategy comparison, 25-year generator cost with service, degradation and replacement |
+| **Generator** | The automation in three steps (read → decide → act), a 20-weather-year strategy comparison, 25-year generator cost with service, degradation and replacement |
 | **Optimizer** | Panels × batteries heatmap of lifecycle cost; alternatives table; click any cell to load that design |
 | **Budget** | Line-item Victoria budget (permits, PST/GST, labour, BOS, contingency), CSV export, lifecycle cash flow, BC Hydro context |
 | **Assumptions** | Every modelling and budget assumption, with sources |
 
-## Files
+## How the code is organised
+
+```
+settings ──► model ──► tabs
+(controls)   (engine + budget)   (one file per tab)
+```
+
+1. **Settings.** `settings.js` lists every adjustable input. `ui/controls.js` builds the left panel from that list, so a new input appears without touching any UI code.
+2. **Model.** `ui/model.js` turns the settings into the design, a simulated hourly year, the backup test, the budget and the requirement checks. It calls the pure calculation files, which never touch the page.
+3. **Tabs.** Each file in `ui/tabs/` is one tab: a title, a one-line intro, its cards, and a `render(model)` function. `app.js` builds the tab bar from them and keeps the URL hash in sync.
 
 | File | Role |
 |---|---|
@@ -55,9 +64,15 @@ The optimizer puts this design within 0.3 % of the lowest 25-year lifecycle cost
 | `engine.js` | String sizing, component rules, weather, hourly dispatch, generator model, autonomy, optimizer |
 | `budget.js` | Capital budget, Victoria permits, BC PST/GST, lifecycle NPV |
 | `settings.js` | Parameter schema (drives the control panel) and persistence |
-| `charts.js`, `app.js`, `index.html`, `styles.css` | UI |
+| `app.js` | Wires settings → model → tabs; tab routing |
+| `ui/ui.js` | Formatting, card/table/KPI builders, tab registry |
+| `ui/model.js`, `ui/controls.js`, `ui/sld.js` | Model, settings panel, single-line diagram |
+| `ui/tabs/*.js` | Overview, Energy, Generator, Optimizer, Budget, Assumptions |
+| `charts.js`, `styles.css`, `index.html` | SVG charts, styles (light + dark), page shell |
 | `tests/` | `run-tests.js` (Node) and `index.html` (browser) |
+| `e2e/`, `playwright.config.js` | Browser tests against the Pages-style build |
 | `tools/report.js` | Generates the budget report from the engine |
+| `tools/build-site.js`, `tools/serve.js` | Build `_site/` and serve it under `/team_green/` |
 | `docs/FUNCTIONAL_REQUIREMENTS.md` | Requirements traced to code and tests |
 | `docs/BUDGET_VICTORIA.md` | Generated high-fidelity budget |
 | `research/preliminary-research.md` | Preliminary research for the Solve Energy solar challenge |

@@ -3,9 +3,7 @@
 name: E2E on GitHub Pages
 
 on:
-  workflow_run:
-    workflows: [pages build and deployment]
-    types: [completed]
+  page_build:
   workflow_dispatch:
 
 permissions:
@@ -13,11 +11,11 @@ permissions:
 
 jobs:
   e2e-live:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || github.event.build.status == 'built'
     runs-on: ubuntu-latest
     env:
       E2E_BASE_URL: https://jam-sw.github.io/team_green/
-      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      SHA: ${{ github.event.build.commit || github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:

@@ -18,7 +18,7 @@ const OUT = path.resolve(ROOT, process.argv[2] || '_site');
 
 // Site files, plus the browser test page and the markdown reports it links to.
 const FILES = ['index.html', 'styles.css', 'data.js', 'engine.js', 'budget.js', 'settings.js', 'charts.js', 'app.js'];
-const DIRS = ['tests', 'docs'];
+const DIRS = ['ui', 'tests', 'docs'];
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });

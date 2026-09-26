@@ -6,7 +6,7 @@
     "test": "node tests/run-tests.js",
     "build": "node tools/build-site.js",
     "serve": "node tools/build-site.js && node tools/serve.js",
-    "test:e2e": "node tools/build-site.js && playwright test",
+    "test:e2e": "playwright test",
     "test:e2e:live": "playwright test"
   },
   "devDependencies": {

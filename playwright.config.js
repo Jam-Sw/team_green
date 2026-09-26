@@ -15,7 +15,7 @@ module.exports = defineConfig({
   use: { baseURL, trace: 'retain-on-failure' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: live ? undefined : {
-    command: 'node tools/serve.js _site 4173 /team_green/',
+    command: 'node tools/build-site.js && node tools/serve.js _site 4173 /team_green/',
     url: baseURL,
     reuseExistingServer: !process.env.CI
   }

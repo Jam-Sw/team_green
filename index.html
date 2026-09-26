@@ -4,162 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SunPage – Off-Grid Solar Planner</title>
+    <meta name="description" content="Size, simulate and budget an off-grid solar + battery system for a 400 A home in Victoria, BC.">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>☀️</text></svg>">
 </head>
 <body>
-    <!-- ═══════════════════════ HEADER ═══════════════════════ -->
     <header class="app-header">
-        <div class="header-left">
-            <span class="logo">☀️</span>
+        <div class="brand">
+            <span class="logo" aria-hidden="true">☀️</span>
             <h1>SunPage</h1>
-            <span class="subtitle">Off-grid solar + battery planner · Victoria, BC · 400 A service</span>
+            <span class="subtitle">Off-grid solar + battery planner · Victoria, BC</span>
         </div>
-        <div class="header-right">
-            <span class="status-badge" id="statusBadge">
-                <span class="status-dot"></span>
-                <span id="statusText">Checking…</span>
-            </span>
-            <button class="btn-secondary-sm" id="resetBtn" title="Restore every setting to its default">↺ Defaults</button>
-            <button class="btn-print" onclick="window.print()" title="Print report">🖨️ Print report</button>
+        <div class="header-actions">
+            <span class="status" id="statusBadge" role="status"><span class="dot"></span><span id="statusText">Checking…</span></span>
+            <button class="btn-ghost only-narrow" id="settingsBtn" type="button" aria-controls="controlPanel">Settings</button>
+            <button class="btn-ghost" id="resetBtn" type="button" title="Restore every setting to its default">Reset</button>
+            <button class="btn-ghost only-wide" id="printBtn" type="button">Print</button>
         </div>
     </header>
 
-    <main class="app-layout">
-        <!-- Generated from SunSettings.SCHEMA by app.js -->
-        <aside class="control-panel" id="controlPanel" aria-label="Design controls"></aside>
+    <div class="app-layout">
+        <!-- Built from SunSettings.SCHEMA by ui/controls.js -->
+        <aside class="control-panel" id="controlPanel" aria-label="Settings"></aside>
 
-        <section class="content">
-            <nav class="tabs" id="tabs" role="tablist">
-                <button class="tab active" data-tab="overview" role="tab">Overview</button>
-                <button class="tab" data-tab="energy" role="tab">Energy</button>
-                <button class="tab" data-tab="generator" role="tab">Generator</button>
-                <button class="tab" data-tab="optimizer" role="tab">Optimizer</button>
-                <button class="tab" data-tab="budget" role="tab">Budget</button>
-                <button class="tab" data-tab="assumptions" role="tab">Assumptions</button>
-            </nav>
+        <main class="content">
+            <!-- Built from the tab registry by app.js; one file per tab in ui/tabs/ -->
+            <nav class="tabs" id="tabs" role="tablist"></nav>
+            <div id="view"></div>
+        </main>
+    </div>
 
-            <!-- ─────────── OVERVIEW ─────────── -->
-            <div class="tab-panel active" id="tab-overview">
-                <div class="kpis" id="kpis"></div>
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>Bill of materials</h3>
-                        <div id="designSummary"></div>
-                    </div>
-                    <div class="card">
-                        <h3>Challenge requirements</h3>
-                        <ul class="checklist" id="checklist"></ul>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Single-line diagram — proposed</h3>
-                    <div id="sld" class="sld"></div>
-                </div>
-                <div class="card">
-                    <h3>PV string sizing (Victoria design minimum temperature)</h3>
-                    <div id="strings"></div>
-                </div>
-            </div>
-
-            <!-- ─────────── ENERGY ─────────── -->
-            <div class="tab-panel" id="tab-energy">
-                <div class="card">
-                    <div class="card-head">
-                        <h3>Average day by season — where each hour's energy comes from</h3>
-                        <div class="seg" id="seasonSeg"></div>
-                    </div>
-                    <div id="dayChart" class="chart"></div>
-                    <h4>Battery state of charge, same average day</h4>
-                    <div id="daySocChart" class="chart"></div>
-                </div>
-                <div class="card">
-                    <h3>Monthly energy balance</h3>
-                    <div id="monthChart" class="chart"></div>
-                    <div id="monthTable"></div>
-                </div>
-                <div class="card">
-                    <h3>Battery state of charge — full year, hourly</h3>
-                    <div id="socChart" class="chart"></div>
-                </div>
-                <div class="card">
-                    <h3>Backup autonomy (no generator, battery starts full)</h3>
-                    <div id="autonomyTable"></div>
-                </div>
-            </div>
-
-            <!-- ─────────── GENERATOR ─────────── -->
-            <div class="tab-panel" id="tab-generator">
-                <div class="card">
-                    <h3>Dispatch automation</h3>
-                    <div id="automation" class="prose"></div>
-                </div>
-                <div class="card">
-                    <div class="card-head">
-                        <h3>Strategy comparison over 20 weather years</h3>
-                        <button class="btn-primary" id="compareBtn">Run comparison</button>
-                    </div>
-                    <div id="compareOut"><p class="muted">Simulates both strategies across 20 seeded weather years and reports median and 90th-percentile generator use.</p></div>
-                </div>
-                <div class="card">
-                    <h3>Generator cost by year (service, degradation, replacement)</h3>
-                    <div id="genYearChart" class="chart"></div>
-                    <div id="genYearTable"></div>
-                </div>
-            </div>
-
-            <!-- ─────────── OPTIMIZER ─────────── -->
-            <div class="tab-panel" id="tab-optimizer">
-                <div class="card">
-                    <div class="card-head">
-                        <h3>Panels × batteries — lifecycle cost</h3>
-                        <div>
-                            <span class="progress" id="optProgress" hidden><span id="optBar"></span></span>
-                            <button class="btn-primary" id="optBtn">Run optimizer</button>
-                        </div>
-                    </div>
-                    <p class="muted">Each cell is a full-year hourly simulation with inverters and GridBOSS auto-sized. Cost = capital budget + NPV of generator, O&amp;M, standby utility and replacements over the analysis horizon. Grey cells fail the backup target or leave load unserved. Click a cell to load that design.</p>
-                    <div id="heatmap" class="chart"></div>
-                </div>
-                <div class="card">
-                    <h3>Design alternatives</h3>
-                    <div id="alternatives"><p class="muted">Run the optimizer to compare alternatives.</p></div>
-                </div>
-            </div>
-
-            <!-- ─────────── BUDGET ─────────── -->
-            <div class="tab-panel" id="tab-budget">
-                <div class="kpis" id="budgetKpis"></div>
-                <div class="card">
-                    <div class="card-head">
-                        <h3>Capital budget — City of Victoria</h3>
-                        <button class="btn-secondary-sm" id="csvBtn">⬇ CSV</button>
-                    </div>
-                    <div id="budgetTable"></div>
-                </div>
-                <div class="card">
-                    <h3>Lifecycle operating cost</h3>
-                    <div id="lifeChart" class="chart"></div>
-                    <div id="lifeTable"></div>
-                </div>
-                <div class="card">
-                    <h3>Context: the same load on BC Hydro</h3>
-                    <div id="gridCompare" class="prose"></div>
-                </div>
-            </div>
-
-            <!-- ─────────── ASSUMPTIONS ─────────── -->
-            <div class="tab-panel" id="tab-assumptions">
-                <div class="card prose" id="assumptions"></div>
-            </div>
-        </section>
-    </main>
-
+    <!-- Calculation (no DOM) -->
     <script src="data.js"></script>
     <script src="engine.js"></script>
     <script src="budget.js"></script>
     <script src="settings.js"></script>
+    <!-- Interface -->
     <script src="charts.js"></script>
+    <script src="ui/ui.js"></script>
+    <script src="ui/model.js"></script>
+    <script src="ui/controls.js"></script>
+    <script src="ui/sld.js"></script>
+    <script src="ui/tabs/overview.js"></script>
+    <script src="ui/tabs/energy.js"></script>
+    <script src="ui/tabs/generator.js"></script>
+    <script src="ui/tabs/optimizer.js"></script>
+    <script src="ui/tabs/budget.js"></script>
+    <script src="ui/tabs/assumptions.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

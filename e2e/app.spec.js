@@ -121,3 +121,38 @@ test('in-browser unit test page passes', async ({ page }) => {
   expect(r.failed).toBe(0);
   expect(r.total).toBeGreaterThan(40);
 });
+
+test('tabs and the URL hash stay in sync', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('tab', { name: 'Energy' }).click();
+  await expect(page).toHaveURL(/#energy$/);
+  await expect(page.locator('#tab-energy')).toHaveClass(/active/);
+
+  // In-page hash change (a link, or the back button) switches tabs too.
+  await page.evaluate(() => { location.hash = 'assumptions'; });
+  await expect(page.locator('#tab-assumptions')).toHaveClass(/active/);
+  await page.goBack();
+  await expect(page.locator('#tab-energy')).toHaveClass(/active/);
+
+  // Unknown hashes fall back to the first tab.
+  await page.goto('./#nope');
+  await expect(page.locator('#tab-overview')).toHaveClass(/active/);
+});
+
+test.describe('phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('fits the screen and opens settings as a drawer', async ({ page }) => {
+    await page.goto('./');
+    await expect(page.locator('#kpis .kpi').first()).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+
+    const slider = page.locator('#ctl-panels');
+    await expect(slider).not.toBeInViewport();
+    await page.locator('#settingsBtn').click();
+    await expect(slider).toBeInViewport();
+    await page.locator('.content').click({ position: { x: 380, y: 400 } });
+    await expect(slider).not.toBeInViewport();
+  });
+});
