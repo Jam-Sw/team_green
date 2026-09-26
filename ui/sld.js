@@ -17,52 +17,63 @@ window.SunSld = (function () {
   var EQ = window.SunData.EQUIPMENT, n1 = window.SunUI.n1;
 
   function render(el, d) {
-    var W = 1000, H = 440, gb = d.gridboss;
-    var colW = (W - 360) / gb;
-    var svg = [];
+    var W = 1000, H = 450, gb = d.gridboss;
+    var left = 220, colW = (W - 20 - left) / gb;
+    var wires = [], boxes = [];
 
     function box(x, y, w, h, title, sub, cls) {
-      svg.push('<rect class="box ' + (cls || '') + '" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"/>');
-      svg.push('<text x="' + (x + w / 2) + '" y="' + (y + (sub ? h / 2 - 3 : h / 2 + 4)) + '" text-anchor="middle">' + title + '</text>');
-      if (sub) svg.push('<text class="small" x="' + (x + w / 2) + '" y="' + (y + h / 2 + 12) + '" text-anchor="middle">' + sub + '</text>');
+      boxes.push('<rect class="box ' + (cls || '') + '" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"/>');
+      boxes.push('<text x="' + (x + w / 2) + '" y="' + (y + (sub ? h / 2 - 3 : h / 2 + 4)) + '" text-anchor="middle">' + title + '</text>');
+      if (sub) boxes.push('<text class="small" x="' + (x + w / 2) + '" y="' + (y + h / 2 + 12) + '" text-anchor="middle">' + sub + '</text>');
     }
     function wire(pts, cls) {
-      svg.push('<polyline class="wire ' + (cls || '') + '" points="' + pts.map(function (p) { return p.join(','); }).join(' ') + '"/>');
+      wires.push('<polyline class="wire ' + (cls || '') + '" points="' + pts.map(function (p) { return p.join(','); }).join(' ') + '"/>');
     }
 
     // Utility chain and generator (left column)
-    box(20, 20, 130, 44, 'BC Hydro meter', 'standby, zero export', 'existing');
-    box(20, 100, 130, 44, '400 A fused disc.', 'service entrance', 'new');
-    box(20, 180, 130, 44, 'Distribution splitter', 'one leg per GridBOSS', 'new');
-    wire([[85, 64], [85, 100]]);
-    wire([[85, 144], [85, 180]]);
-    box(20, 300, 130, 44, 'BE7500ID 6 kW', 'existing · 2-wire start', 'existing');
+    box(20, 20, 150, 44, 'BC Hydro meter', 'standby, zero export', 'existing');
+    box(20, 100, 150, 44, d.serviceA + ' A fused disconnect', 'service entrance', 'new');
+    box(20, 180, 150, 44, 'Distribution splitter', 'one leg per GridBOSS', 'new');
+    box(20, 300, 150, 44, 'BE7500ID 6 kW', 'existing · 2-wire start', 'existing');
+    wire([[95, 64], [95, 100]]);
+    wire([[95, 144], [95, 180]]);
 
-    // One column per GridBOSS, inverters and batteries spread across them.
+    // One column per GridBOSS; inverters and batteries spread across them.
     var invLeft = d.inverters, batPer = Math.floor(d.batteries / d.inverters), batExtra = d.batteries % d.inverters;
-    var invIdx = 0, strs = Math.ceil(d.layout.count / d.inverters);
+    var invIdx = 0, strs = Math.ceil(d.layout.count / d.inverters), batX = [], lastGb = left;
     for (var g = 0; g < gb; g++) {
-      var cx = 200 + colW * g, bw = Math.min(200, colW - 30);
+      var bw = Math.min(300, colW - 40), cx = left + colW * g + (colW - bw) / 2, mid = cx + bw / 2;
       var nInv = Math.ceil(invLeft / (gb - g));
       invLeft -= nInv;
-      box(cx, 180, bw, 44, 'GridBOSS #' + (g + 1), '200 A · GEN / hybrid ports', 'new');
+      lastGb = cx;
       box(cx, 20, bw, 44, '200 A panel ' + String.fromCharCode(65 + g), 'house loads', 'new');
-      wire([[150, 202], [cx, 202]]);
-      wire([[cx + bw / 2, 180], [cx + bw / 2, 64]]);
-      if (g === 0) wire([[150, 322], [175, 322], [175, 214], [cx, 214]], 'gen');
-      var iw = Math.max(60, (bw - (nInv - 1) * 8) / nInv);
+      box(cx, 180, bw, 44, 'GridBOSS #' + (g + 1), '200 A · GEN / hybrid ports', 'new');
+      wire([[mid, 64], [mid, 180]]);
+      if (g === 0) wire([[170, 322], [195, 322], [195, 214], [cx, 214]], 'gen');
+
+      var iw = Math.max(70, (bw - (nInv - 1) * 10) / nInv);
       for (var k = 0; k < nInv; k++) {
-        var x = cx + k * (iw + 8);
+        var x = cx + k * (iw + 10), xm = x + iw / 2;
         var bats = batPer + (invIdx < batExtra ? 1 : 0);
-        box(x, 270, iw, 44, 'FlexBOSS21', '#' + (invIdx + 1) + ' · ☀ ' + strs + ' str', 'new');
-        wire([[x + iw / 2, 270], [x + iw / 2, 224]]);
+        // Narrow boxes (many inverters) swap the name into the small line.
+        if (iw >= 110) box(x, 270, iw, 44, 'FlexBOSS21', '#' + (invIdx + 1) + ' · ' + strs + ' PV strings', 'new');
+        else box(x, 270, iw, 44, '#' + (invIdx + 1), 'FlexBOSS21', 'new');
         box(x, 360, iw, 44, bats + ' × 280Ah', n1(bats * EQ.battery.energyKwh) + ' kWh', 'new');
-        wire([[x + iw / 2, 314], [x + iw / 2, 360]], 'bat');
+        wire([[xm, 224], [xm, 270]]);
+        wire([[xm, 314], [xm, 360]], 'bat');
+        batX.push(xm);
         invIdx++;
       }
     }
+    // Splitter feeds every GridBOSS along one line.
+    wire([[170, 202], [lastGb, 202]]);
     // Paralleled inverters share one 48 V bank.
-    if (d.inverters > 1) wire([[220, 414], [200 + colW * (gb - 1) + Math.min(200, colW - 30) - 20, 414]], 'bat');
+    if (batX.length > 1) {
+      batX.forEach(function (x) { wire([[x, 404], [x, 426]], 'bat'); });
+      wire([[batX[0], 426], [batX[batX.length - 1], 426]], 'bat');
+    }
+    // Wires first, so boxes sit on top and no line crosses a label.
+    var svg = wires.concat(boxes);
 
     el.innerHTML =
       '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Single-line diagram">' + svg.join('') + '</svg>' +

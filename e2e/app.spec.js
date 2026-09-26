@@ -38,6 +38,9 @@ test('loads the recommended design with every requirement met', async ({ page })
   await expect(page.locator('#controlPanel details.ctl-group')).toHaveCount(6);
   await expect(page.locator('#checklist li')).not.toHaveCount(0);
   await expect(page.locator('#sld svg')).toBeVisible();
+  // Wires are drawn under the boxes so no line crosses a label.
+  const order = await page.locator('#sld svg > *').evaluateAll((els) => els.map((e) => e.tagName));
+  expect(order.lastIndexOf('polyline')).toBeLessThan(order.indexOf('rect'));
   await expect(page.locator('#designSummary')).toContainText('FlexBOSS21');
 });
 
