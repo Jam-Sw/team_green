@@ -158,6 +158,27 @@ test('budget exports as CSV', async ({ page }) => {
   expect(csv).toContain('Total installed cost');
 });
 
+test('generator and cost settings update the budget totals', async ({ page }) => {
+  await page.goto('./#budget');
+  const installed = page.locator('#budgetKpis .kpi').first().locator('.kpi-value');
+  const lifecycle = page.locator('#budgetKpis .kpi').nth(2).locator('.kpi-value');
+  const installedBefore = await installed.textContent();
+  const lifecycleBefore = await lifecycle.textContent();
+
+  // Fuel is a running cost: it changes the lifecycle total, not installation.
+  await page.locator('#controlPanel details.ctl-group').nth(3).evaluate((el) => { el.open = true; });
+  await page.locator('#ctl-genCostPerKwh').fill('3');
+  await expect(lifecycle).not.toHaveText(lifecycleBefore);
+  await expect(installed).toHaveText(installedBefore);
+
+  // Electrician labour is an installed cost, so both totals must update.
+  const lifecycleAfterFuel = await lifecycle.textContent();
+  await page.locator('#controlPanel details.ctl-group').nth(5).evaluate((el) => { el.open = true; });
+  await page.locator('#ctl-electricianRate').fill('200');
+  await expect(installed).not.toHaveText(installedBefore);
+  await expect(lifecycle).not.toHaveText(lifecycleAfterFuel);
+});
+
 test('in-browser unit test page passes', async ({ page }) => {
   await page.goto('./tests/index.html');
   const results = await page.waitForFunction(() => {

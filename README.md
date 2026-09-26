@@ -10,11 +10,11 @@ The architecture follows [`shubin123/drippage`](https://github.com/shubin123/dri
 
 ```bash
 python3 -m http.server 8000     # then open http://localhost:8000
-node tests/run-tests.js         # 54 tests: physics, datasheet rules, budget
+node tests/run-tests.js         # 56 tests: physics, datasheet rules, budget
 node tools/report.js            # regenerate docs/BUDGET_VICTORIA.md
 
 npm install && npx playwright install chromium
-npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 12 browser tests
+npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 13 browser tests
 E2E_BASE_URL=https://jam-sw.github.io/team_green/ npm run test:e2e:live   # same tests on the live site
 ```
 

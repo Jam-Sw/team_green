@@ -132,6 +132,45 @@ TestRunner.suite('Lifecycle & context', function () {
   });
 });
 
+TestRunner.suite('Budget-sensitive settings', function () {
+  function projectedBudget(overrides) {
+    var d = budgetDesign(overrides);
+    var sim = SunEngine.simulateSteadyYear(d);
+    var cap = SunBudget.capex(d);
+    return { cap: cap, life: SunBudget.lifecycle(d, SunEngine.lifecycleEnergy(d, sim.totals.gen), cap), sim: sim };
+  }
+
+  TestRunner.test('generator fuel, service and replacement settings reach the 25-year total', function (assert) {
+    var base = projectedBudget();
+    var fuel = projectedBudget({ genCostPerKwh: 3.00 });
+    var service = projectedBudget({ genServiceCost: 700 });
+    var threshold = projectedBudget({ genReplaceAtEff: 0.90 });
+    var replacement = projectedBudget({ genReplaceCost: 9000 });
+    var batteryRule = projectedBudget({ genStrategy: 'soc' });
+
+    assert.approxEqual(fuel.cap.total, base.cap.total, 1e-6, 'fuel does not change installed cost');
+    assert.isTrue(fuel.life.lifecycle > base.life.lifecycle, 'higher fuel cost increases lifecycle cost');
+    assert.isTrue(service.life.lifecycle > base.life.lifecycle, 'higher service cost increases lifecycle cost');
+    assert.isTrue(threshold.life.lifecycle > base.life.lifecycle, 'earlier generator replacement increases lifecycle cost');
+    assert.isTrue(replacement.life.lifecycle > base.life.lifecycle, 'higher replacement price increases lifecycle cost');
+    assert.isTrue(batteryRule.sim.totals.gen > base.sim.totals.gen, 'battery-level rule changes dispatch');
+    assert.isTrue(batteryRule.life.lifecycle > base.life.lifecycle, 'dispatch rule changes lifecycle cost');
+  });
+
+  TestRunner.test('installed-cost and lifecycle controls reach their respective totals', function (assert) {
+    var base = projectedBudget();
+    var labour = projectedBudget({ electricianRate: 200, installerRate: 150 });
+    var allowances = projectedBudget({ overheadPct: 30, contingencyPct: 25, freightPct: 10 });
+    var future = projectedBudget({ horizonYears: 30, discountPct: 0, escalationPct: 6, omPerYear: 1500 });
+    var noUtility = projectedBudget({ keepUtility: false });
+
+    assert.isTrue(labour.cap.total > base.cap.total, 'labour rates increase installed cost');
+    assert.isTrue(allowances.cap.total > base.cap.total, 'overhead, contingency and freight increase installed cost');
+    assert.isTrue(future.life.lifecycle > base.life.lifecycle, 'horizon, discount, escalation and upkeep increase lifecycle cost');
+    assert.isTrue(noUtility.life.lifecycle < base.life.lifecycle, 'removing standby utility lowers lifecycle cost');
+  });
+});
+
 TestRunner.suite('Settings', function () {
   TestRunner.test('defaults cover every schema key', function (assert) {
     var d = SunSettings.defaults();
