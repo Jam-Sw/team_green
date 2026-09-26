@@ -81,8 +81,14 @@
       if (y.inverters > 0) spikes.push('the inverter replacement (year ' + y.year + ')');
       if (y.batteries > 0) spikes.push('the battery replacement (year ' + y.year + ')');
     });
+    // Each service costs the generator 2% efficiency, so at ~10 services a
+    // year it reaches the replacement point every year or two. Say so, or the
+    // alternating bar heights look like a bug.
+    var gens = U.sum(life.years, function (y) { return y.genReplacements; });
+    var genNote = gens ? ' Bars that step up every year or two include a replacement generator (' + U.money(d.genReplaceCost) +
+      '): each 100 kWh service costs it 2% efficiency, and it is replaced at ' + U.pct(d.genReplaceAtEff) + ', ' + gens + ' times over ' + d.horizonYears + ' years.' : '';
     U.$('lifeCaption').textContent = 'Each bar is one year. Most of it is generator fuel and service' +
-      (spikes.length ? '; the tall bars are ' + spikes.join(' and ') + '.' : '.');
+      (spikes.length ? '; the tall bars are ' + spikes.join(' and ') + '.' : '.') + genNote;
     C.stackedBars(U.$('lifeChart'), {
       labels: life.years.map(function (y) { return String(y.year); }), unit: '$', height: 220,
       series: [
