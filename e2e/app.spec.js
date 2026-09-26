@@ -39,8 +39,15 @@ test('loads the recommended design with every requirement met', async ({ page })
   await expect(page.locator('#checklist li')).not.toHaveCount(0);
   await expect(page.locator('#sld svg')).toBeVisible();
   // Wires are drawn under the boxes so no line crosses a label.
-  const order = await page.locator('#sld svg > *').evaluateAll((els) => els.map((e) => e.tagName));
-  expect(order.lastIndexOf('polyline')).toBeLessThan(order.indexOf('rect'));
+  const order = await page.locator('#sld svg > *').evaluateAll((els) =>
+    els.map((e) => (e.querySelector(':scope > polyline') ? 'wire' : e.classList.contains('part') ? 'part' : '')));
+  expect(order.lastIndexOf('wire')).toBeLessThan(order.indexOf('part'));
+
+  // The step list explains the drawing one step at a time.
+  await expect(page.locator('.bp-steps button')).toHaveCount(6);
+  await page.locator('.bp-steps button[data-step="2"]').click();
+  await expect(page.locator('.blueprint')).toHaveClass(/focus/);
+  await expect(page.locator('.blueprint .part.on').first()).toContainText('280Ah');
   await expect(page.locator('#designSummary')).toContainText('FlexBOSS21');
 });
 

@@ -227,8 +227,6 @@ tr.best td { background: var(--accent-soft); }
 .legend-item { display: inline-flex; align-items: center; gap: 6px; }
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
 .swatch-line { height: 2px; width: 14px; border-radius: 1px; }
-.swatch-box { width: 14px; background: none; border: 1.5px solid var(--accent); }
-.swatch-box.existing { border: 1.5px dashed var(--text-3); }
 .chart-tip {
   position: fixed; z-index: 100; pointer-events: none; max-width: 280px;
   background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
@@ -243,15 +241,72 @@ tr.best td { background: var(--accent-soft); }
 .progress { display: inline-block; width: 120px; height: 4px; background: var(--sunken); border-radius: 2px; overflow: hidden; }
 .progress span { display: block; height: 100%; width: 0; background: var(--accent); }
 
-.sld { overflow-x: auto; }
-.sld svg { width: 100%; min-width: 640px; height: auto; display: block; }
-.sld .box { fill: var(--surface); stroke: var(--accent); stroke-width: 1.5; rx: 6; }
-.sld .box.existing { stroke: var(--text-3); stroke-dasharray: 5 3; }
-.sld .wire { stroke: var(--text-3); stroke-width: 2; fill: none; }
-.sld .bat { stroke: var(--c-battery); }
-.sld .gen { stroke: var(--c-gen); }
-.sld text { fill: var(--text); font-size: 12px; }
-.sld text.small { fill: var(--text-3); font-size: 10.5px; }
+/* Blueprint single-line diagram (ui/sld.js). Always blueprint blue, in
+   either theme: paper → projector hotspot → grid → dithered falloff. */
+.sld {
+  --bp-paper: #0c3566; --bp-hot: #2366b3; --bp-edge: #082449;
+  --bp-ink: #eaf4ff; --bp-ink-2: #a8c8ea; --bp-line: #d4e7fb;
+  --bp-bus: #7fd6ff; --bp-gen: #ffc46b;
+}
+.blueprint {
+  overflow-x: auto; border-radius: 8px;
+  background: var(--bp-edge);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06), 0 10px 30px -12px rgba(8, 36, 73, .55);
+}
+.blueprint svg { display: block; width: 100%; min-width: 680px; height: auto; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.blueprint .paper { fill: var(--bp-paper); }
+.blueprint .hot-0 { stop-color: var(--bp-hot); stop-opacity: .75; }
+.blueprint .hot-1 { stop-color: var(--bp-edge); stop-opacity: .9; }
+.blueprint .grid-minor { fill: none; stroke: #fff; stroke-opacity: .05; stroke-width: .6; }
+.blueprint .grid-major { fill: none; stroke: #fff; stroke-opacity: .12; stroke-width: .8; }
+.blueprint .dot { fill: #b9dcff; fill-opacity: .28; }
+.blueprint .dot.dim { fill-opacity: .12; }
+.blueprint .hatch { stroke: #bfe0ff; stroke-opacity: .35; stroke-width: 1; }
+.blueprint .border { fill: none; stroke: var(--bp-ink); stroke-opacity: .7; stroke-width: 1.5; }
+.blueprint .border.thin { stroke-opacity: .35; stroke-width: .8; }
+
+.blueprint .cast { fill: url(#bp-hatch); }
+.blueprint .part .box { fill: #154a8a; stroke: var(--bp-ink); stroke-width: 1.4; rx: 3; filter: url(#bp-emboss); }
+.blueprint .part.existing .box { fill: #0f3c72; stroke-dasharray: 6 4; }
+.blueprint .part text { text-anchor: middle; }
+.blueprint .part .t { fill: var(--bp-ink); font-size: 11.5px; font-weight: 600; letter-spacing: .06em; }
+.blueprint .part .t.fit { font-size: 9.5px; letter-spacing: 0; }
+.blueprint .part .s { fill: var(--bp-ink-2); font-size: 9.5px; letter-spacing: .02em; }
+
+.blueprint .wire { fill: none; stroke: var(--bp-line); stroke-width: 1.6; stroke-linejoin: round; }
+.blueprint .wire.bat { stroke: var(--bp-bus); stroke-width: 2.2; }
+.blueprint .wire.gen { stroke: var(--bp-gen); stroke-dasharray: 8 4; }
+.blueprint .wl { fill: var(--bp-ink-2); font-size: 9px; letter-spacing: .08em; }
+
+.blueprint .mark circle { fill: var(--bp-gen); stroke: var(--bp-edge); stroke-width: 2; }
+.blueprint .mark text { fill: var(--bp-edge); font-size: 11px; font-weight: 700; text-anchor: middle; }
+.blueprint .part, .blueprint .mark { cursor: help; }
+
+.blueprint .title-block rect, .blueprint .title-block path,
+.blueprint .legend > rect { fill: rgba(8, 36, 73, .55); stroke: var(--bp-ink); stroke-opacity: .7; }
+.blueprint .title-block path { fill: none; }
+.blueprint .title-block text, .blueprint .legend text { fill: var(--bp-ink-2); font-size: 9px; letter-spacing: .08em; }
+.blueprint .title-block .tb-title { fill: var(--bp-ink); font-size: 10px; font-weight: 700; }
+.blueprint .legend .box { fill: #154a8a; stroke: var(--bp-ink); stroke-width: 1.2; }
+.blueprint .legend .existing-s { stroke-dasharray: 4 3; }
+
+/* Step focus: dim everything that isn't the chosen step. */
+.blueprint [data-step] { transition: opacity .2s ease; }
+.blueprint.focus [data-step]:not(.on) { opacity: .15; }
+
+.bp-steps { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.bp-steps button {
+  display: grid; grid-template-columns: 24px 1fr; gap: 2px 10px; align-items: start; align-content: start;
+  width: 100%; height: 100%; padding: 10px 12px; text-align: left;
+  background: var(--sunken); border: 1px solid transparent; border-radius: 8px; color: var(--text-2); font-size: .82rem;
+}
+.bp-steps button:hover, .bp-steps button.on { border-color: var(--bp-paper); background: var(--surface); }
+.bp-steps .bp-n {
+  grid-row: span 2; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--bp-paper); color: var(--bp-gen); font: 700 .75rem ui-monospace, Menlo, monospace;
+}
+.bp-steps b { color: var(--text); font-weight: 600; }
+.bp-steps button.on .bp-n { background: var(--bp-gen); color: var(--bp-edge); }
 
 /* ── 6. Small screens: settings become a drawer ───────────────────────── */
 .only-narrow { display: none; }
@@ -268,11 +323,13 @@ tr.best td { background: var(--accent-soft); }
   }
   body.settings-open .control-panel { transform: none; box-shadow: 0 0 40px rgba(0, 0, 0, .2); }
   .grid-2, .steps { grid-template-columns: minmax(0, 1fr); }
+  .bp-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kpi-value { font-size: 1.2rem; }
 }
 @media (max-width: 480px) {
   .status #statusText { display: none; }
+  .bp-steps { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ── Print: every tab, on white ────────────────────────────────────────── */

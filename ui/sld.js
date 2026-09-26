@@ -2,12 +2,17 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  * SunPage single-line diagram — ui/sld.js
  * ═══════════════════════════════════════════════════════════════════════════════
- * Draws the proposed wiring as SVG from the design counts:
+ * Draws the proposed wiring as a blueprint sheet, built from the design counts:
  *
- *   BC Hydro meter → 400 A disconnect → splitter ─┬─ GridBOSS #1 → 200 A panel A
- *                                                 └─ GridBOSS #2 → 200 A panel B
- *   each GridBOSS ← FlexBOSS21 inverter(s) ← shared 48 V battery bank
- *   generator → GridBOSS #1 GEN port
+ *   1 sun → FlexBOSS21 inverters        4 GridBOSS → 200 A panels → house
+ *   2 inverters ↔ shared 48 V battery   5 generator → GridBOSS GEN port
+ *   3 inverters → GridBOSS (AC)         6 BC Hydro → disconnect → splitter
+ *
+ * Every element carries data-step="n"; the step list under the drawing
+ * highlights one step at a time.
+ *
+ * Drawing order matters: sheet → wires → cast shadows → boxes → callouts,
+ * so no line ever crosses a label.
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -16,29 +21,52 @@ window.SunSld = (function () {
 
   var EQ = window.SunData.EQUIPMENT, n1 = window.SunUI.n1;
 
+  var STEPS = [
+    { t: 'Sun → inverters', d: 'Each FlexBOSS21 takes its PV strings on three MPPT inputs and turns sunlight into power.' },
+    { t: 'Inverters ↔ battery', d: 'All inverters share one 48 V battery bank. Surplus sun charges it; at night it carries the house.' },
+    { t: 'Inverters → GridBOSS', d: 'Inverter AC output meets at the GridBOSS, which chooses the source for every circuit.' },
+    { t: 'GridBOSS → house', d: 'Each GridBOSS feeds one 200 A panel, so the full service stays available.' },
+    { t: 'Generator backup', d: 'The existing 6 kW generator plugs into the GEN port and starts itself only when the forecast says the battery will fall short.' },
+    { t: 'BC Hydro standby', d: 'The utility connection stays, through a new disconnect and splitter, but only as standby. Nothing is exported.' }
+  ];
+
   function render(el, d) {
-    var W = 1000, H = 450, gb = d.gridboss;
-    var left = 220, colW = (W - 20 - left) / gb;
-    var wires = [], boxes = [];
+    var W = 1000, H = 540, gb = d.gridboss;
+    var left = 240, colW = (980 - left) / gb;
+    var layers = { wires: [], shadows: [], boxes: [], marks: [] };
 
-    function box(x, y, w, h, title, sub, cls) {
-      boxes.push('<rect class="box ' + (cls || '') + '" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"/>');
-      boxes.push('<text x="' + (x + w / 2) + '" y="' + (y + (sub ? h / 2 - 3 : h / 2 + 4)) + '" text-anchor="middle">' + title + '</text>');
-      if (sub) boxes.push('<text class="small" x="' + (x + w / 2) + '" y="' + (y + h / 2 + 12) + '" text-anchor="middle">' + sub + '</text>');
+    // ── Primitives ──────────────────────────────────────────────────────
+    function box(step, x, y, w, h, title, sub, cls) {
+      var dz = 7; // depth of the oblique projection
+      layers.shadows.push('<polygon data-step="' + step + '" class="cast" points="' +
+        [[x + w, y], [x + w + dz, y + dz], [x + w + dz, y + h + dz], [x + dz, y + h + dz], [x, y + h]].map(function (p) { return p.join(','); }).join(' ') + '"/>');
+      layers.boxes.push('<g data-step="' + step + '" class="part ' + (cls || '') + '">' +
+        '<rect class="box" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"/>' +
+        '<text class="t' + (title.length * 7.6 > w - 12 ? ' fit' : '') + '" x="' + (x + w / 2) + '" y="' + (y + (sub ? h / 2 - 3 : h / 2 + 4)) + '">' + title + '</text>' +
+        (sub ? '<text class="s" x="' + (x + w / 2) + '" y="' + (y + h / 2 + 12) + '">' + sub + '</text>' : '') +
+        '</g>');
     }
-    function wire(pts, cls) {
-      wires.push('<polyline class="wire ' + (cls || '') + '" points="' + pts.map(function (p) { return p.join(','); }).join(' ') + '"/>');
+    function wire(step, pts, cls, label, lx, ly) {
+      layers.wires.push('<g data-step="' + step + '"><polyline class="wire ' + (cls || '') + '" points="' +
+        pts.map(function (p) { return p.join(','); }).join(' ') + '"/>' +
+        (label ? '<text class="wl" x="' + lx + '" y="' + ly + '"' + (cls === 'gen' ? ' transform="rotate(-90 ' + lx + ' ' + ly + ')"' : '') + '>' + label + '</text>' : '') + '</g>');
+    }
+    function mark(step, x, y) {
+      layers.marks.push('<g data-step="' + step + '" class="mark"><circle cx="' + x + '" cy="' + y + '" r="10"/>' +
+        '<text x="' + x + '" y="' + (y + 4) + '">' + step + '</text></g>');
     }
 
-    // Utility chain and generator (left column)
-    box(20, 20, 150, 44, 'BC Hydro meter', 'standby, zero export', 'existing');
-    box(20, 100, 150, 44, d.serviceA + ' A fused disconnect', 'service entrance', 'new');
-    box(20, 180, 150, 44, 'Distribution splitter', 'one leg per GridBOSS', 'new');
-    box(20, 300, 150, 44, 'BE7500ID 6 kW', 'existing · 2-wire start', 'existing');
-    wire([[95, 64], [95, 100]]);
-    wire([[95, 144], [95, 180]]);
+    // ── 6 Utility chain and 5 generator (left column) ───────────────────
+    box(6, 30, 40, 150, 44, 'BC HYDRO METER', 'standby · zero export', 'existing');
+    box(6, 30, 120, 150, 44, d.serviceA + ' A DISCONNECT', 'fused · service entrance');
+    box(6, 30, 200, 150, 44, 'SPLITTER', 'one leg per GridBOSS');
+    box(5, 30, 330, 150, 44, 'BE7500ID 6 kW', 'existing · 2-wire start', 'existing');
+    wire(6, [[105, 84], [105, 120]]);
+    wire(6, [[105, 164], [105, 200]]);
+    mark(6, 30, 40);
+    mark(5, 30, 330);
 
-    // One column per GridBOSS; inverters and batteries spread across them.
+    // ── One column per GridBOSS; inverters and batteries spread across ──
     var invLeft = d.inverters, batPer = Math.floor(d.batteries / d.inverters), batExtra = d.batteries % d.inverters;
     var invIdx = 0, strs = Math.ceil(d.layout.count / d.inverters), batX = [], lastGb = left;
     for (var g = 0; g < gb; g++) {
@@ -46,45 +74,135 @@ window.SunSld = (function () {
       var nInv = Math.ceil(invLeft / (gb - g));
       invLeft -= nInv;
       lastGb = cx;
-      box(cx, 20, bw, 44, '200 A panel ' + String.fromCharCode(65 + g), 'house loads', 'new');
-      box(cx, 180, bw, 44, 'GridBOSS #' + (g + 1), '200 A · GEN / hybrid ports', 'new');
-      wire([[mid, 64], [mid, 180]]);
-      if (g === 0) wire([[170, 322], [195, 322], [195, 214], [cx, 214]], 'gen');
+      box(4, cx, 40, bw, 44, '200 A PANEL ' + String.fromCharCode(65 + g), 'house loads');
+      box(3, cx, 200, bw, 44, 'GRIDBOSS #' + (g + 1), '200 A · GEN / hybrid ports');
+      wire(4, [[mid, 84], [mid, 200]]);
+      if (g === 0) {
+        wire(5, [[180, 352], [210, 352], [210, 234], [cx, 234]], 'gen', 'GEN 240 V', 204, 330);
+        mark(4, cx, 40);
+        mark(3, cx, 200);
+      }
 
       var iw = Math.max(70, (bw - (nInv - 1) * 10) / nInv);
       for (var k = 0; k < nInv; k++) {
         var x = cx + k * (iw + 10), xm = x + iw / 2;
         var bats = batPer + (invIdx < batExtra ? 1 : 0);
         // Narrow boxes (many inverters) swap the name into the small line.
-        if (iw >= 110) box(x, 270, iw, 44, 'FlexBOSS21', '#' + (invIdx + 1) + ' · ' + strs + ' PV strings', 'new');
-        else box(x, 270, iw, 44, '#' + (invIdx + 1), 'FlexBOSS21', 'new');
-        box(x, 360, iw, 44, bats + ' × 280Ah', n1(bats * EQ.battery.energyKwh) + ' kWh', 'new');
-        wire([[xm, 224], [xm, 270]]);
-        wire([[xm, 314], [xm, 360]], 'bat');
+        if (iw >= 130) box(1, x, 290, iw, 44, 'FLEXBOSS21 #' + (invIdx + 1), strs + ' PV strings');
+        else box(1, x, 290, iw, 44, '#' + (invIdx + 1), 'FlexBOSS21');
+        box(2, x, 380, iw, 44, bats + ' × 280Ah', n1(bats * EQ.battery.energyKwh) + ' kWh');
+        wire(3, [[xm, 244], [xm, 290]], '', invIdx === 0 ? '240 V AC' : '', xm + 6, 272);
+        wire(2, [[xm, 334], [xm, 380]], 'bat');
+        if (invIdx === 0) { mark(1, x, 290); mark(2, x, 380); }
         batX.push(xm);
         invIdx++;
       }
     }
-    // Splitter feeds every GridBOSS along one line.
-    wire([[170, 202], [lastGb, 202]]);
-    // Paralleled inverters share one 48 V bank.
-    if (batX.length > 1) {
-      batX.forEach(function (x) { wire([[x, 404], [x, 426]], 'bat'); });
-      wire([[batX[0], 426], [batX[batX.length - 1], 426]], 'bat');
-    }
-    // Wires first, so boxes sit on top and no line crosses a label.
-    var svg = wires.concat(boxes);
+    // 6 Splitter feeds every GridBOSS along one line.
+    wire(6, [[180, 222], [lastGb, 222]], '', '240 V AC', 186, 216);
+    // 2 Paralleled inverters share one 48 V bank.
+    batX.forEach(function (x) { wire(2, [[x, 424], [x, 448]], 'bat'); });
+    if (batX.length > 1) wire(2, [[batX[0], 448], [batX[batX.length - 1], 448]], 'bat', '48 V DC BUS', batX[0] + 6, 462);
 
     el.innerHTML =
-      '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Single-line diagram">' + svg.join('') + '</svg>' +
-      '<div class="chart-legend">' +
-        '<span class="legend-item"><i class="swatch swatch-box"></i>new</span>' +
-        '<span class="legend-item"><i class="swatch swatch-box existing"></i>existing</span>' +
-        '<span class="legend-item"><i class="swatch swatch-line" style="--c:var(--c-battery)"></i>shared 48 V battery bus</span>' +
-        '<span class="legend-item"><i class="swatch swatch-line" style="--c:var(--c-gen)"></i>generator feed</span>' +
+      '<div class="blueprint">' +
+        '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Single-line diagram, blueprint">' +
+          defs() + sheet(W, H) + titleBlock(d, W, H) + legend(H) +
+          layers.wires.join('') + layers.shadows.join('') + layers.boxes.join('') + layers.marks.join('') +
+        '</svg>' +
       '</div>' +
+      '<ol class="bp-steps">' + STEPS.map(function (s, i) {
+        return '<li><button type="button" data-step="' + (i + 1) + '"><span class="bp-n">' + (i + 1) + '</span>' +
+          '<b>' + s.t + '</b><span>' + s.d + '</span></button></li>';
+      }).join('') + '</ol>' +
       '<p class="muted">The existing emergency-loads panel is re-fed from panel A; the manual transfer switch is retired (GridBOSS handles source transfer).</p>';
+
+    wireSteps(el);
   }
 
-  return { render: render };
+  // ── Sheet: grid, projector hotspot, dithered falloff, border ──────────
+  function defs() {
+    return '<defs>' +
+      // Drafting grid: minor 10, major 50.
+      '<pattern id="bp-minor" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" class="grid-minor"/></pattern>' +
+      '<pattern id="bp-major" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="url(#bp-minor)"/><path d="M50 0H0V50" class="grid-major"/></pattern>' +
+      // Ordered (Bayer 4×4) dither: two strong and two faint dots per cell.
+      '<pattern id="bp-dither" width="4" height="4" patternUnits="userSpaceOnUse">' +
+        '<rect x="0" y="0" width="1" height="1" class="dot"/><rect x="2" y="2" width="1" height="1" class="dot"/>' +
+        '<rect x="2" y="0" width="1" height="1" class="dot dim"/><rect x="0" y="2" width="1" height="1" class="dot dim"/></pattern>' +
+      // Projector hotspot, and a ring mask so the dither only shows in the falloff.
+      '<radialGradient id="bp-hot" cx="50%" cy="45%" r="65%"><stop offset="0" class="hot-0"/><stop offset="1" class="hot-1"/></radialGradient>' +
+      '<radialGradient id="bp-ring" cx="50%" cy="45%" r="70%"><stop offset=".35" stop-color="#000"/><stop offset=".75" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>' +
+      '<mask id="bp-falloff"><rect width="100%" height="100%" fill="url(#bp-ring)"/></mask>' +
+      // Drafting hatch for cast shadows.
+      '<pattern id="bp-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V5" class="hatch"/></pattern>' +
+      // Emboss: light from the top-left raises each part off the sheet.
+      '<filter id="bp-emboss" x="-5%" y="-10%" width="110%" height="130%">' +
+        '<feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="blur"/>' +
+        '<feSpecularLighting in="blur" surfaceScale="2.5" specularConstant=".7" specularExponent="16" lighting-color="#cfe8ff" result="spec">' +
+          '<feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>' +
+        '<feComposite in="spec" in2="SourceAlpha" operator="in" result="lit"/>' +
+        '<feComposite in="SourceGraphic" in2="lit" operator="arithmetic" k2="1" k3=".45"/>' +
+      '</filter>' +
+    '</defs>';
+  }
+
+  function sheet(W, H) {
+    return '<rect class="paper" width="' + W + '" height="' + H + '"/>' +
+      '<rect width="' + W + '" height="' + H + '" fill="url(#bp-hot)"/>' +
+      '<rect width="' + W + '" height="' + H + '" fill="url(#bp-major)"/>' +
+      '<rect width="' + W + '" height="' + H + '" fill="url(#bp-dither)" mask="url(#bp-falloff)"/>' +
+      '<rect class="border" x="8" y="8" width="' + (W - 16) + '" height="' + (H - 16) + '"/>' +
+      '<rect class="border thin" x="14" y="14" width="' + (W - 28) + '" height="' + (H - 28) + '"/>';
+  }
+
+  function titleBlock(d, W, H) {
+    var x = W - 334, y = H - 84, w = 320, h = 70;
+    return '<g class="title-block">' +
+      '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"/>' +
+      '<path d="M' + x + ' ' + (y + 30) + 'H' + (x + w) + 'M' + (x + 200) + ' ' + (y + 30) + 'V' + (y + h) + '"/>' +
+      '<text class="tb-title" x="' + (x + 10) + '" y="' + (y + 20) + '">SINGLE-LINE DIAGRAM · OFF-GRID PV + STORAGE</text>' +
+      '<text x="' + (x + 10) + '" y="' + (y + 46) + '">' + d.serviceA + ' A SERVICE · VICTORIA, BC</text>' +
+      '<text x="' + (x + 10) + '" y="' + (y + 62) + '">' + d.panels + ' × 440 W · ' + d.inverters + ' INV · ' + d.batteries + ' BATT</text>' +
+      '<text x="' + (x + 210) + '" y="' + (y + 46) + '">DWG  SLD-01</text>' +
+      '<text x="' + (x + 210) + '" y="' + (y + 62) + '">REV  A · NTS</text>' +
+    '</g>';
+  }
+
+  function legend(H) {
+    var x = 30, y = H - 84;
+    function row(i, sample, label) {
+      return '<g transform="translate(' + (x + 10) + ',' + (y + 14 + i * 15) + ')">' + sample + '<text x="34" y="4">' + label + '</text></g>';
+    }
+    return '<g class="legend">' +
+      '<rect x="' + x + '" y="' + y + '" width="190" height="70"/>' +
+      row(0, '<rect class="box" x="0" y="-5" width="24" height="10"/>', 'NEW EQUIPMENT') +
+      row(1, '<rect class="box existing-s" x="0" y="-5" width="24" height="10"/>', 'EXISTING, REUSED') +
+      row(2, '<path class="wire bat" d="M0 0H24"/>', '48 V DC BATTERY BUS') +
+      row(3, '<path class="wire gen" d="M0 0H24"/>', 'GENERATOR FEED') +
+    '</g>';
+  }
+
+  // ── Step list ↔ drawing highlight ─────────────────────────────────────
+  function wireSteps(el) {
+    var bp = el.querySelector('.blueprint');
+    var pinned = null;
+    function focus(step) {
+      bp.classList.toggle('focus', !!step);
+      bp.querySelectorAll('[data-step]').forEach(function (n) { n.classList.toggle('on', n.getAttribute('data-step') === step); });
+      el.querySelectorAll('.bp-steps button').forEach(function (b) { b.classList.toggle('on', b.dataset.step === step); });
+    }
+    el.querySelectorAll('.bp-steps button').forEach(function (b) {
+      b.addEventListener('mouseenter', function () { focus(b.dataset.step); });
+      b.addEventListener('mouseleave', function () { focus(pinned); });
+      b.addEventListener('click', function () { pinned = pinned === b.dataset.step ? null : b.dataset.step; focus(pinned); });
+    });
+    // Hovering a part of the drawing highlights its step too.
+    bp.querySelectorAll('.part, .mark').forEach(function (n) {
+      n.addEventListener('mouseenter', function () { focus(n.getAttribute('data-step')); });
+      n.addEventListener('mouseleave', function () { focus(pinned); });
+    });
+  }
+
+  return { render: render, STEPS: STEPS };
 })();
