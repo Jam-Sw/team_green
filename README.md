@@ -14,7 +14,7 @@ node tests/run-tests.js         # 52 tests: physics, datasheet rules, budget
 node tools/report.js            # regenerate docs/BUDGET_VICTORIA.md
 
 npm install && npx playwright install chromium
-npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 9 browser tests
+npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 11 browser tests
 E2E_BASE_URL=https://jam-sw.github.io/team_green/ npm run test:e2e:live   # same tests on the live site
 ```
 
@@ -38,14 +38,16 @@ The optimizer puts this design within 0.3 % of the lowest 25-year lifecycle cost
 
 ## What's in the app
 
+Every tab opens with one sentence saying what it shows, and every chart has a caption saying how to read it. Settings use plain words and units. Technical terms are defined on the Assumptions tab.
+
 | Tab | Contents |
 |---|---|
-| **Overview** | Headline numbers, parts list with the rule behind each count, requirement checklist (FR-1…FR-10), single-line diagram, string sizing |
-| **Energy** | Average day per season (solar / battery / generator vs load), battery SOC, monthly balance, 8,760-hour SOC trace, autonomy table |
-| **Generator** | The automation in three steps (read → decide → act), a 20-weather-year strategy comparison, 25-year generator cost with service, degradation and replacement |
-| **Optimizer** | Panels × batteries heatmap of lifecycle cost; alternatives table; click any cell to load that design |
-| **Budget** | Line-item Victoria budget (permits, PST/GST, labour, BOS, contingency), CSV export, lifecycle cash flow, BC Hydro context |
-| **Assumptions** | Every modelling and budget assumption, with sources |
+| **Overview** | One-sentence verdict, headline numbers, parts list with the rule behind each count, requirement checklist (FR-1…FR-10), blueprint single-line diagram explained in six steps, string sizing |
+| **Energy** | Average day by season (where each hour's power comes from), battery level, month by month, every hour of the year, backup days with no generator |
+| **Generator** | The automation in three steps (read → decide → act), forecast-aware vs. a battery-level rule over 20 weather years, generator cost by year |
+| **Optimizer** | 25-year cost of every panel × battery mix; a shortlist of four picks; click any square to load that design |
+| **Budget** | Installed cost by category with all line items on request (permits, PST/GST, labour), CSV export, running cost by year, BC Hydro comparison |
+| **Assumptions** | Model and budget assumptions, a glossary of terms, and sources |
 
 ## How the code is organised
 

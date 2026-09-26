@@ -22,12 +22,12 @@ window.SunSld = (function () {
   var EQ = window.SunData.EQUIPMENT, n1 = window.SunUI.n1;
 
   var STEPS = [
-    { t: 'Sun → inverters', d: 'Each FlexBOSS21 takes its PV strings on three MPPT inputs and turns sunlight into power.' },
-    { t: 'Inverters ↔ battery', d: 'All inverters share one 48 V battery bank. Surplus sun charges it; at night it carries the house.' },
-    { t: 'Inverters → GridBOSS', d: 'Inverter AC output meets at the GridBOSS, which chooses the source for every circuit.' },
+    { t: 'Sun → inverters', d: 'Panel strings feed each FlexBOSS21 inverter, which turns sunlight into usable power.' },
+    { t: 'Inverters ↔ battery', d: 'All inverters share one 48 V battery bank. Surplus sun charges it; at night it runs the house.' },
+    { t: 'Inverters → GridBOSS', d: 'Inverter output meets at the GridBOSS, which picks the power source for the house.' },
     { t: 'GridBOSS → house', d: 'Each GridBOSS feeds one 200 A panel, so the full service stays available.' },
-    { t: 'Generator backup', d: 'The existing 6 kW generator plugs into the GEN port and starts itself only when the forecast says the battery will fall short.' },
-    { t: 'BC Hydro standby', d: 'The utility connection stays, through a new disconnect and splitter, but only as standby. Nothing is exported.' }
+    { t: 'Generator backup', d: 'The existing generator plugs into the GridBOSS and starts itself only when the forecast says the battery will fall short.' },
+    { t: 'BC Hydro standby', d: 'The utility stays connected through a new disconnect and splitter, as standby only. Nothing is exported.' }
   ];
 
   function render(el, d) {

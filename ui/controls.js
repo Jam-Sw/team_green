@@ -51,6 +51,16 @@ window.SunControls = (function () {
     return wrap;
   }
 
+  /** A slider value with its unit: 92 · 0.88 × · −16.0 °C · 50% · $3,500 · $1.65/kWh */
+  function format(f, v) {
+    if (f.pct) return Math.round(v * 100) + '%';
+    var n = (f.step < 1 ? Number(v).toFixed(f.step < 0.1 ? 2 : 1) : Number(v).toLocaleString()).replace('-', '−');
+    var unit = f.unit || '';
+    if (unit.charAt(0) === '$') return '$' + n + unit.slice(1);
+    if (unit.charAt(0) === '%') return n + unit;
+    return unit ? n + ' ' + unit : n;
+  }
+
   /** Show each slider's value; flag counts the datasheet minimums raised. */
   function refresh(settings, design) {
     var raised = { batteries: design.batteries, inverters: design.inverters };
@@ -58,12 +68,12 @@ window.SunControls = (function () {
       var out = U.$('val-' + f.key);
       if (!out) return;
       var v = settings[f.key];
-      var txt = (f.step < 1 ? Number(v).toFixed(f.step < 0.1 ? 2 : 1) : v) + (f.unit ? ' ' + f.unit : '');
+      var txt = format(f, v);
       var actual = raised[f.key];
       var adjusted = actual != null && actual !== v;
       out.textContent = adjusted ? v + ' → ' + actual : txt;
       out.classList.toggle('adjusted', adjusted);
-      out.title = adjusted ? 'Raised to the datasheet / service minimum' : '';
+      out.title = adjusted ? 'Raised automatically: the design needs at least ' + actual : '';
     });
   }
 

@@ -76,7 +76,7 @@
       panel.className = 'tab-panel';
       panel.id = 'tab-' + t.id;
       panel.setAttribute('role', 'tabpanel');
-      panel.innerHTML = '<p class="intro">' + t.intro + '</p>' + t.html;
+      panel.innerHTML = '<p class="intro" id="intro-' + t.id + '"></p>' + t.html;
       view.appendChild(panel);
       if (t.init) t.init(app);
     });
@@ -99,7 +99,14 @@
 
   function renderTab(id) {
     var t = tabById(id);
-    if (t && model) t.render(model, app);
+    if (!t || !model) return;
+    renderIntro(t);
+    t.render(model, app);
+  }
+
+  /** A tab's intro is a sentence, or a function of the model for a live one. */
+  function renderIntro(t) {
+    U.$('intro-' + t.id).innerHTML = typeof t.intro === 'function' ? t.intro(model) : t.intro;
   }
 
   function route() { show(location.hash.slice(1)); }
@@ -122,7 +129,10 @@
 
     // Print every tab, not just the open one, with details expanded.
     window.addEventListener('beforeprint', function () {
-      U.tabs.forEach(function (t) { if (t.id !== 'optimizer') t.render(model, app); });
+      U.tabs.forEach(function (t) {
+        renderIntro(t);
+        if (t.id !== 'optimizer') t.render(model, app);
+      });
       document.querySelectorAll('.content details').forEach(function (d) { d.open = true; });
     });
     var rt;

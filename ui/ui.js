@@ -6,8 +6,10 @@
  * ui/tabs/ registers itself here with:
  *
  *   SunUI.tab({
- *     id, title, intro,          // nav label + one-line "what this shows"
+ *     id, title,                 // nav label
+ *     intro,                     // one sentence, or function(m) for a live one
  *     html,                      // static card skeleton, inserted once
+ *     init(app),                 // optional: wire buttons once
  *     render(m, app)             // fill the skeleton from the model
  *   })
  *
@@ -29,7 +31,11 @@ window.SunUI = (function () {
     return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
   function sum(arr, fn) { return arr.reduce(function (a, x) { return a + (fn ? fn(x) : x); }, 0); }
-  function uniq(a) { return a.filter(function (v, i) { return a.indexOf(v) === i; }).join('/'); }
+  /** [12, 11, 12] → "11–12"; [12, 12] → "12". */
+  function span(a) {
+    var lo = Math.min.apply(null, a), hi = Math.max.apply(null, a);
+    return lo === hi ? String(lo) : lo + '–' + hi;
+  }
 
   // ── HTML builders ──────────────────────────────────────────────────────
   function $(id) { return document.getElementById(id); }
@@ -40,6 +46,11 @@ window.SunUI = (function () {
       (sub ? '<div class="kpi-sub">' + sub + '</div>' : '') + '</div>';
   }
 
+  /** One line under a card title saying how to read what follows. */
+  function caption(text, id) {
+    return '<p class="caption"' + (id ? ' id="' + id + '"' : '') + '>' + (text || '') + '</p>';
+  }
+
   /** A card: title, optional action slot (HTML), body. */
   function card(title, body, action) {
     return '<section class="card"><div class="card-head"><h3>' + title + '</h3>' + (action || '') + '</div>' + body + '</section>';
@@ -47,17 +58,21 @@ window.SunUI = (function () {
 
   /**
    * A table from column specs and rows.
-   * cols: [{ t: 'Header', num: true }] · rows: [[cell, …]] · opts.rowClass(i)
+   * cols: [{ t: 'Header', num: true, nowrap: true }] · rows: [[cell, …]] · opts.rowClass(i)
    */
   function table(cols, rows, opts) {
     opts = opts || {};
+    function cls(c) {
+      var k = (c && c.num ? 'num ' : '') + (c && c.nowrap ? 'nowrap' : '');
+      return k.trim() ? ' class="' + k.trim() + '"' : '';
+    }
     return '<div class="table-scroll"><table><thead><tr>' +
-      cols.map(function (c) { return '<th' + (c.num ? ' class="num"' : '') + '>' + c.t + '</th>'; }).join('') +
+      cols.map(function (c) { return '<th' + cls(c) + '>' + c.t + '</th>'; }).join('') +
       '</tr></thead><tbody>' +
       rows.map(function (r, i) {
-        var cls = opts.rowClass ? opts.rowClass(i) : '';
-        return '<tr' + (cls ? ' class="' + cls + '"' : '') + '>' +
-          r.map(function (v, j) { return '<td' + (cols[j] && cols[j].num ? ' class="num"' : '') + '>' + v + '</td>'; }).join('') + '</tr>';
+        var rc = opts.rowClass ? opts.rowClass(i) : '';
+        return '<tr' + (rc ? ' class="' + rc + '"' : '') + '>' +
+          r.map(function (v, j) { return '<td' + cls(cols[j]) + '>' + v + '</td>'; }).join('') + '</tr>';
       }).join('') +
       '</tbody></table></div>';
   }
@@ -84,8 +99,8 @@ window.SunUI = (function () {
   function tab(def) { tabs.push(def); }
 
   return {
-    money: money, kwh: kwh, pct: pct, n1: n1, esc: esc, sum: sum, uniq: uniq,
-    $: $, kpi: kpi, card: card, table: table, segmented: segmented,
+    money: money, kwh: kwh, pct: pct, n1: n1, esc: esc, sum: sum, span: span,
+    $: $, kpi: kpi, caption: caption, card: card, table: table, segmented: segmented,
     tab: tab, tabs: tabs,
     COLORS: {
       solar: 'var(--c-solar)', battery: 'var(--c-battery)', gen: 'var(--c-gen)',

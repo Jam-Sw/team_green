@@ -49,6 +49,8 @@ test('loads the recommended design with every requirement met', async ({ page })
   await expect(page.locator('.blueprint')).toHaveClass(/focus/);
   await expect(page.locator('.blueprint .part.on').first()).toContainText('280Ah');
   await expect(page.locator('#designSummary')).toContainText('FlexBOSS21');
+  // The page leads with the answer in one sentence.
+  await expect(page.locator('#intro-overview')).toContainText('meet all 11 challenge requirements');
 });
 
 test('every tab renders its content', async ({ page }) => {
@@ -130,6 +132,27 @@ test('in-browser unit test page passes', async ({ page }) => {
   const r = await results.jsonValue();
   expect(r.failed).toBe(0);
   expect(r.total).toBeGreaterThan(40);
+});
+
+test('every tab explains itself: an intro, and a caption on every chart', async ({ page }) => {
+  await page.goto('./');
+  for (const name of ['Overview', 'Energy', 'Generator', 'Optimizer', 'Budget', 'Assumptions']) {
+    await page.getByRole('tab', { name }).click();
+    const panel = page.locator('#tab-' + name.toLowerCase());
+    await expect(panel.locator('.intro')).not.toBeEmpty();
+    const uncaptioned = await panel.locator('.chart').evaluateAll((charts) => charts
+      .filter((c) => !(c.closest('.card')?.querySelector('.caption')?.textContent.trim()))
+      .map((c) => c.id));
+    expect(uncaptioned, 'charts without a caption').toEqual([]);
+  }
+});
+
+test('settings read in plain units', async ({ page }) => {
+  await page.goto('./');
+  await expect(page.locator('#val-genReplaceCost')).toHaveText('$3,500');
+  await expect(page.locator('#val-omPerYear')).toHaveText('$300/yr');
+  await expect(page.locator('#val-genReplaceAtEff')).toHaveText('70%');
+  await expect(page.locator('#val-designLowC')).toHaveText('−16.0 °C');
 });
 
 test('tabs and the URL hash stay in sync', async ({ page }) => {

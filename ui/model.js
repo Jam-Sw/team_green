@@ -42,28 +42,31 @@ window.SunModel = (function () {
   function checks(m) {
     var d = m.d, T = m.T, sd = d.minimums.stringDesign, I = EQ.inverter, t = m.target;
     var season = t.season.name.toLowerCase();
+    var ah = d.batteries * EQ.battery.capacityAh;
     return [
-      { fr: 'FR-1', ok: true, text: 'Component counts determined',
-        detail: d.panels + ' panels · ' + d.inverters + ' FlexBOSS21 · ' + d.gridboss + ' GridBOSS · ' + d.batteries + ' batteries' },
-      { fr: 'FR-2', ok: t.solar.days >= d.autonomyDays, text: d.autonomyDays + '-day backup in ' + season + ' without the generator',
-        detail: days(t.solar) + ' days at average ' + season + ' sun from a full battery' },
-      { fr: 'FR-5', ok: T.unserved < 0.01, text: 'Every hour of the year served',
-        detail: T.unserved < 0.01 ? 'No unserved energy' : U.kwh(T.unserved) + ' unserved' },
-      { fr: 'FR-6', ok: sd.ok && d.layout.ok, text: 'Strings within FlexBOSS21 MPPT limits',
-        detail: 'Longest string Voc at ' + d.designLowC + ' °C: ' + U.n1(Math.max.apply(null, d.layout.strings) * sd.vocColdV) + ' V (< ' + I.mpptHighProtectV + ' V)' },
+      { fr: 'FR-1', ok: true, text: 'Every part counted from the datasheet rules',
+        detail: d.panels + ' panels · ' + d.inverters + ' inverters · ' + d.gridboss + ' GridBOSS · ' + d.batteries + ' batteries' },
+      { fr: 'FR-2', ok: t.solar.days >= d.autonomyDays, text: d.autonomyDays + '-day ' + season + ' backup without the generator',
+        detail: 'A full battery lasts ' + days(t.solar) + ' days at average ' + season + ' sun' },
+      { fr: 'FR-5', ok: T.unserved < 0.01, text: 'Power in every hour of the year',
+        detail: T.unserved < 0.01 ? 'No hour goes without power' : U.kwh(T.unserved) + ' short over the year' },
+      { fr: 'FR-6', ok: sd.ok && d.layout.ok, text: 'Panel strings within the inverter\'s voltage limits',
+        detail: 'Coldest-morning string voltage ' + U.n1(Math.max.apply(null, d.layout.strings) * sd.vocColdV) + ' V, limit ' + I.mpptHighProtectV + ' V' },
       { fr: 'FR-7', ok: d.inverters * I.batteryOnlyKw >= d.designPeakKw, text: 'Inverters carry the peak on battery alone',
-        detail: d.inverters + ' × ' + I.batteryOnlyKw + ' kW = ' + d.inverters * I.batteryOnlyKw + ' kW ≥ ' + d.designPeakKw + ' kW' },
-      { fr: 'FR-7', ok: d.batteries * EQ.battery.capacityAh >= d.inverters * I.minBatteryAhPerInverter, text: '≥ 600 Ah of battery per inverter',
-        detail: d.batteries * EQ.battery.capacityAh + ' Ah for ' + d.inverters + ' inverter(s)' },
-      { fr: 'FR-7', ok: d.pvKw <= d.inverters * I.maxPvKw, text: '≤ 21 kW of PV per inverter',
-        detail: U.n1(d.pvKw) + ' kW on ' + d.inverters + ' inverter(s)' },
+        detail: d.inverters + ' × ' + I.batteryOnlyKw + ' kW = ' + d.inverters * I.batteryOnlyKw + ' kW for a ' + d.designPeakKw + ' kW peak' },
+      { fr: 'FR-7', ok: ah >= d.inverters * I.minBatteryAhPerInverter, text: 'At least 600 Ah of battery per inverter',
+        detail: ah.toLocaleString() + ' Ah for ' + d.inverters + ' inverter' + (d.inverters > 1 ? 's' : '') },
+      { fr: 'FR-7', ok: d.pvKw <= d.inverters * I.maxPvKw, text: 'At most ' + I.maxPvKw + ' kW of solar per inverter',
+        detail: U.n1(d.pvKw) + ' kW on ' + d.inverters + ' inverter' + (d.inverters > 1 ? 's' : '') + ' (' + d.inverters * I.maxPvKw + ' kW max)' },
       { fr: 'FR-7', ok: d.gridboss * EQ.gridboss.ratedA >= d.serviceA && d.inverters <= d.gridboss * EQ.gridboss.maxInverters,
-        text: d.serviceA + ' A service covered by GridBOSS', detail: d.gridboss + ' × 200 A GridBOSS, ≤ 3 inverters each' },
-      { fr: 'FR-8', ok: true, text: 'Existing 6 kW generator integrated',
-        detail: 'GridBOSS GEN port (125 A) ≥ 25 A generator output; 2-wire auto-start' },
-      { fr: 'FR-9', ok: true, text: 'Zero export to BC Hydro', detail: 'Surplus PV is curtailed: ' + U.kwh(T.curtailed) + '/yr' },
-      { fr: 'FR-10', ok: true, text: 'Generator use minimised',
-        detail: U.kwh(T.gen) + '/yr, ' + T.genStarts + ' starts, ' + U.money(T.genCost) + ' in year 1 (' + (d.genStrategy === 'smart' ? 'forecast-aware' : 'SOC trigger') + ')' }
+        text: 'The ' + d.serviceA + ' A service is covered by GridBOSS units',
+        detail: d.gridboss + ' × ' + EQ.gridboss.ratedA + ' A, up to ' + EQ.gridboss.maxInverters + ' inverters each' },
+      { fr: 'FR-8', ok: true, text: 'Existing 6 kW generator connected',
+        detail: 'GridBOSS generator port (125 A) with a 2-wire auto-start' },
+      { fr: 'FR-9', ok: true, text: 'Nothing exported to BC Hydro',
+        detail: 'Surplus solar is switched off: ' + U.kwh(T.curtailed) + ' a year' },
+      { fr: 'FR-10', ok: true, text: 'Generator use kept low',
+        detail: U.kwh(T.gen) + ' a year over ' + T.genStarts + ' starts, ' + U.money(T.genCost) + ' in year 1' }
     ];
   }
 

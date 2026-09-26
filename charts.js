@@ -115,7 +115,9 @@ window.SunCharts = (function () {
     var bw = Math.max(2, Math.min(40, slot * 0.72));
     var sy = function (v) { return f.ih * v / max; };
     var bars = el('g', {}, f.svg);
-    var every = opts.labelEvery || 1;
+    // Skip labels when bars get narrow (phones), so they never run together.
+    var longest = Math.max.apply(null, opts.labels.map(function (l) { return String(l).length; }));
+    var every = Math.max(opts.labelEvery || 1, Math.ceil((longest * 7 + 8) / slot));
 
     for (var i = 0; i < n; i++) {
       var x = PAD.left + slot * i + (slot - bw) / 2;
