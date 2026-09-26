@@ -1,0 +1,45 @@
+# Pages publishes main from the repository root ("Deploy from a branch").
+# After each Pages build, rerun the e2e suite against the live site.
+name: E2E on GitHub Pages
+
+on:
+  workflow_run:
+    workflows: [pages build and deployment]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-live:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      E2E_BASE_URL: https://jam-sw.github.io/team_green/
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # The CDN can lag the build; wait until it serves this commit's app.js.
+      - name: Wait for the deployed commit
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "${E2E_BASE_URL}app.js?nocache=$RANDOM" | cmp -s - app.js && exit 0
+            sleep 10
+          done
+          echo "Pages is not serving $SHA yet" && exit 1
+      - name: E2E (live deployment)
+        run: npm run test:e2e:live
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-live
+          path: playwright-report/

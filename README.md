@@ -1,5 +1,7 @@
 # ☀️ SunPage — Off-Grid Solar + Battery Planner (Victoria, BC)
 
+**Live app:** https://jam-sw.github.io/team_green/ · [browser test suite](https://jam-sw.github.io/team_green/tests/)
+
 Team Green's entry for the URECx Solve Design Hackathon. It sizes, simulates and budgets an off-grid EG4 FlexBOSS21 + GridBOSS + 280Ah battery system with JA Solar 440 W panels, powering a 400 A residential service in Victoria, BC. The existing 6 kW generator is dispatched by a forecast-aware automation.
 
 The architecture follows [`shubin123/drippage`](https://github.com/shubin123/drippage): a static, dependency-free site with a schema-driven control panel, a pure calculation engine, and a zero-dependency test runner that works in Node and in the browser.
@@ -16,7 +18,7 @@ npm run test:e2e                # build _site/, serve at /team_green/ like Pages
 E2E_BASE_URL=https://jam-sw.github.io/team_green/ npm run test:e2e:live   # same tests on the live site
 ```
 
-`.github/workflows/pages.yml` runs the unit and e2e tests on every push and PR. On `main` it then deploys `_site/` to GitHub Pages and reruns the e2e suite against the live URL. The e2e suite fails on any console error, any broken request, and any request outside the `/team_green/` sub-path, so a root-absolute URL that works on localhost but 404s on Pages gets caught.
+GitHub Pages publishes `main` from the repository root at https://jam-sw.github.io/team_green/. `.github/workflows/ci.yml` runs the unit and e2e tests on every push and PR. After each Pages build, `.github/workflows/pages-e2e.yml` reruns the e2e suite against the live site. The e2e suite fails on any console error, any broken request, and any request outside the `/team_green/` sub-path, so a root-absolute URL that works on localhost but 404s on Pages gets caught.
 
 ## Recommended design
 
