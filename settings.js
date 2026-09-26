@@ -62,6 +62,7 @@
     { key: 'socStopPct', group: 'generator', type: 'range', label: 'Battery-level rule: stop at', min: 40, max: 100, step: 1, def: 90, unit: '%' },
     { key: 'genCostPerKwh', group: 'generator', type: 'range', label: 'Fuel cost', min: 0.5, max: 4, step: 0.05, def: 1.65, unit: '$/kWh' },
     { key: 'genCarbonPricePerKwh', group: 'generator', type: 'range', label: 'Carbon-price add-on', min: 0, max: 2, step: 0.01, def: 0, unit: '$/kWh', hint: 'Added to each generator kWh. Default 0: BC carbon tax and the federal consumer fuel charge were eliminated in 2025.' },
+    { key: 'genStartWearCost', group: 'generator', type: 'range', label: 'Start-wear allowance', min: 0, max: 200, step: 5, def: 25, unit: '$/start', hint: 'Planning assumption for wear from each start; it is included in generator and lifecycle cost.' },
     { key: 'genServiceCost', group: 'generator', type: 'range', label: 'Service, every 100 kWh', min: 100, max: 800, step: 10, def: 300, unit: '$' },
     { key: 'genReplaceAtEff', group: 'generator', type: 'range', label: 'Replace at efficiency', min: 0.5, max: 0.9, step: 0.01, def: 0.7, unit: '%', pct: true, hint: 'Each service costs 2% efficiency.' },
     { key: 'genReplaceCost', group: 'generator', type: 'range', label: 'Replacement generator', min: 1000, max: 10000, step: 100, def: 3500, unit: '$' },

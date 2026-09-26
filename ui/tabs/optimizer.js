@@ -1,7 +1,7 @@
 /**
  * Optimizer tab — ui/tabs/optimizer.js
  * Every panel × battery mix from the design search (ui/search.js), coloured
- * by total cost (installed + discounted running costs). The numbered squares
+ * by worst-year cost (installed + discounted running costs). The numbered squares
  * are the Suggestions tiers; click any square to load that design.
  */
 (function () {
@@ -16,13 +16,12 @@
     intro: function (m) {
       var years = m.s.weatherMode === 'variable' ? Search.WEATHER_YEARS + ' simulated weather years' : 'a full year';
       return 'Every mix of panels and batteries, each simulated hour by hour over ' + years + ' and costed over ' + m.d.horizonYears +
-        ' years: installed cost plus running costs, in today\'s dollars.';
+        ' years. The recommendation minimizes cost in the worst simulated weather year.';
     },
     html:
       U.card('Cost of every design',
-        U.caption('Each square is one design: panels across, batteries up, coloured by its average total cost over the weather years. ' +
-          'Lighter is cheaper; grey fails a requirement. The outlined square is the cheapest on average, and the numbers mark the tiers ' +
-          'on the Suggestions tab (tier 2 is the recommendation). Click any square to load it.') +
+        U.caption('Each square is one design: panels across, batteries up, coloured by its worst-year 25-year cost. ' +
+          'Lighter is cheaper; grey fails a requirement. The outlined square is the minimax recommendation. Click any square to load it.') +
         '<div id="heatmap" class="chart"></div><p class="muted" id="optNote"></p>',
         '<span class="progress" id="optProgress" hidden><span id="optBar"></span></span>'),
 
@@ -58,7 +57,7 @@
     C.heatmap(U.$('heatmap'), {
       rows: bats.map(String), cols: panels.map(String),
       rowTitle: 'batteries', colTitle: 'panels (440 W)',
-      value: function (i, j) { var x = at(i, j); return x && x.feasible ? x.lifecycle : null; },
+      value: function (i, j) { var x = at(i, j); return x && x.feasible ? x.worstLifecycle : null; },
       fmt: U.money, capRatio: 1.5, emptyLabel: 'fails a requirement',
       highlight: r.best ? cell(r.best) : null,
       marks: r.tiers.map(function (t) { var c = cell(t.row); c.label = t.n; return c; }),
@@ -68,7 +67,7 @@
         var t = r.tiers.filter(function (k) { return k.row === x; })[0];
         return '<div class="tip-title">' + x.panels + ' panels · ' + x.batteries + ' batteries · ' + x.inverters + ' inverters</div>' +
           (t ? 'Tier ' + t.n + ' · ' + t.name + '<br>' : '') +
-          years + '-year cost <b>' + U.money(x.lifecycle) + '</b>' + (r.years > 1 ? ' on average, ' + U.money(x.worstLifecycle) + ' in the worst year' : '') +
+          years + '-year cost <b>' + U.money(x.worstLifecycle) + '</b> in the worst year' + (r.years > 1 ? ', ' + U.money(x.lifecycle) + ' on average' : '') +
           '<br>Installed ' + U.money(x.capex) + '<br>Generator ' + U.kwh(x.genKwh) + ' a year' + (r.years > 1 ? ' on average' : '') +
           (x.feasible ? '' : '<br><b>Fails a requirement</b>');
       },
@@ -76,7 +75,7 @@
     });
 
     U.$('optNote').textContent = r.best
-      ? r.near.length + ' designs cost within 2% of the cheapest on average. The bottom of the cost curve is flat, so budget, roof space and risk can decide between them.'
+      ? r.near.length + ' designs are within 2% of the lowest worst-year cost. The outlined design is the stated minimax recommendation.'
       : 'No design meets every requirement within the site limit.';
   }
 })();

@@ -528,11 +528,12 @@
       }
       soc = r.soc;
 
-      var cost = genOut > 0 ? runGenerator(gen, genOut, s) : 0;
+      var started = genOut > 0 && !T._prevGen;
+      var cost = genOut > 0 ? runGenerator(gen, genOut, s) + (started ? (s.genStartWearCost || 0) : 0) : 0;
       var month = MONTH_OF_DAY[(t / 24) | 0];
       var unserved = Math.max(0, r.unmet);
 
-      if (genOut > 0 && !T._prevGen) T.genStarts++;
+      if (started) T.genStarts++;
       T._prevGen = genOut > 0;
 
       T.load += load; T.pv += pv; T.direct += r.direct; T.discharge += r.discharge;
@@ -610,18 +611,21 @@
    * carrying service count and efficiency across years (costs escalate at
    * `escalationPct` per year).
    */
-  function generatorCostByYear(kwhByYear, s) {
+  function generatorCostByYear(kwhByYear, s, startsByYear) {
     var gen = newGenerator();
     return kwhByYear.map(function (kwh, y) {
       var before = { services: gen.services, replacements: gen.replacements || 0 };
       var esc = Math.pow(1 + s.escalationPct / 100, y);
-      var cost = runGenerator(gen, kwh, s) * esc;
+      var startWear = ((startsByYear && startsByYear[y]) || 0) * (s.genStartWearCost || 0) * esc;
+      var cost = runGenerator(gen, kwh, s) * esc + startWear;
       return {
         year: y + 1,
         kwh: kwh,
         cost: cost,
+        startWear: startWear,
         services: gen.services - before.services,
         replacements: (gen.replacements || 0) - before.replacements,
+        replacementCost: ((gen.replacements || 0) - before.replacements) * s.genReplaceCost * esc,
         efficiencyEnd: gen.efficiency
       };
     });
@@ -637,14 +641,22 @@
    * years between are interpolated (within 0.3 % of simulating every fourth
    * year). Pass the first year's generator kWh if it is already known.
    */
-  function lifecycleEnergy(design, firstYearGen) {
+  function lifecycleDispatch(design, firstYear) {
     var n = design.horizonYears;
-    var first = firstYearGen != null ? firstYearGen : simulateSteadyYear(design).totals.gen;
-    if (n < 2) return [first];
-    var last = simulateSteadyYear(design, { pvAgeFactor: pvAgeFactor(design, n - 1) }).totals.gen;
-    var kwh = [];
-    for (var i = 0; i < n; i++) kwh.push(first + (last - first) * i / (n - 1));
-    return kwh;
+    var first = firstYear || simulateSteadyYear(design).totals;
+    if (n < 2) return { kwh: [first.gen], starts: [first.genStarts] };
+    var last = simulateSteadyYear(design, { pvAgeFactor: pvAgeFactor(design, n - 1) }).totals;
+    var kwh = [], starts = [];
+    for (var i = 0; i < n; i++) {
+      kwh.push(first.gen + (last.gen - first.gen) * i / (n - 1));
+      starts.push(first.genStarts + (last.genStarts - first.genStarts) * i / (n - 1));
+    }
+    return { kwh: kwh, starts: starts };
+  }
+
+  function lifecycleEnergy(design, firstYearGen) {
+    var first = firstYearGen != null ? { gen: firstYearGen, genStarts: 0 } : null;
+    return lifecycleDispatch(design, first).kwh;
   }
 
   /**
@@ -653,7 +665,7 @@
    * generator, O&M and replacements). Designs that fail the N-day autonomy
    * requirement or leave any load unserved are marked infeasible.
    *
-   * `costFn(design, genKwhByYear)` is supplied by the budget module, and the
+   * `costFn(design, genKwhByYear, genStartsByYear)` is supplied by the budget module, and the
    * generator kWh include PV ageing (lifecycleEnergy), so the optimizer and
    * the budget can never disagree about cost.
    */
@@ -687,7 +699,8 @@
     var sim = simulateSteadyYear(d, { strategy: s.genStrategy });
     var aut = autonomy(d, s.autonomySeason, s.autonomyDays + 1, true);
     var feasible = aut.days >= s.autonomyDays && sim.totals.unserved < 0.01 && d.layout.ok;
-    var cost = costFn(d, lifecycleEnergy(d, sim.totals.gen));
+    var dispatch = lifecycleDispatch(d, sim.totals);
+    var cost = costFn(d, dispatch.kwh, dispatch.starts);
     return {
       panels: panels, batteries: d.batteries, inverters: d.inverters, gridboss: d.gridboss,
       genKwh: sim.totals.gen, autonomyDays: aut.days, feasible: feasible,
@@ -745,6 +758,7 @@
     generatorCostByYear: generatorCostByYear,
     pvAgeFactor: pvAgeFactor,
     lifecycleEnergy: lifecycleEnergy,
+    lifecycleDispatch: lifecycleDispatch,
     optimize: optimize,
     optimizerGrid: optimizerGrid,
     evaluate: evaluate,

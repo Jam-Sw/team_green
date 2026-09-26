@@ -33,7 +33,7 @@ This is an illustrative coincident-load schedule used to size the inverter minim
 | PV production (DC) | 45,221 kWh |
 | Solar share of load | 94.7 % |
 | Generator energy | 756 kWh (25 starts, 126 h) |
-| Generator cost (fuel + carbon-price add-on + service) | $3,435 |
+| Generator cost (fuel + carbon-price add-on + service) | $4,060 |
 | Curtailed PV (zero export) | 32,117 kWh |
 | Unserved energy | 0 kWh |
 | Winter backup, no generator (average sun / zero sun) | 10.3 days / 1.3 days |
@@ -117,35 +117,35 @@ This is an illustrative coincident-load schedule used to size the inverter minim
 
 | Year | Gen kWh | Generator | Services | Gen. replaced | O&M | Standby utility | Replacements | Total |
 |---:|---:|---:|---:|:---:|---:|---:|---:|---:|
-| 1 | 756 | $3,435 | 7 |  | $300 | $0 | $0 | $3,735 |
-| 2 | 765 | $4,054 | 8 |  | $306 | $0 | $0 | $4,360 |
-| 3 | 775 | $7,375 | 7 | yes | $312 | $0 | $0 | $7,687 |
-| 4 | 784 | $4,174 | 8 |  | $318 | $0 | $0 | $4,493 |
-| 5 | 793 | $8,138 | 8 | yes | $325 | $0 | $0 | $8,463 |
-| 6 | 802 | $4,309 | 8 |  | $331 | $0 | $0 | $4,641 |
-| 7 | 812 | $8,589 | 8 | yes | $338 | $0 | $0 | $8,927 |
-| 8 | 821 | $4,806 | 9 |  | $345 | $0 | $0 | $5,150 |
-| 9 | 830 | $4,890 | 8 |  | $351 | $0 | $0 | $5,241 |
-| 10 | 839 | $8,867 | 8 | yes | $359 | $0 | $0 | $9,226 |
-| 11 | 849 | $5,447 | 9 |  | $366 | $0 | $0 | $5,813 |
-| 12 | 858 | $9,325 | 8 | yes | $373 | $0 | $0 | $9,698 |
-| 13 | 867 | $5,678 | 9 |  | $380 | $0 | $17,977 | $24,036 |
-| 14 | 876 | $10,172 | 9 | yes | $388 | $0 | $0 | $10,560 |
-| 15 | 886 | $5,934 | 9 |  | $396 | $0 | $0 | $6,330 |
-| 16 | 895 | $10,648 | 9 | yes | $404 | $0 | $43,661 | $54,713 |
-| 17 | 904 | $6,220 | 9 |  | $412 | $0 | $0 | $6,632 |
-| 18 | 913 | $11,128 | 9 | yes | $420 | $0 | $0 | $11,548 |
-| 19 | 923 | $6,540 | 9 |  | $428 | $0 | $0 | $6,968 |
-| 20 | 932 | $11,608 | 9 | yes | $437 | $0 | $0 | $12,045 |
-| 21 | 941 | $7,342 | 10 |  | $446 | $0 | $0 | $7,788 |
-| 22 | 950 | $12,091 | 9 | yes | $455 | $0 | $0 | $12,546 |
-| 23 | 960 | $7,761 | 10 |  | $464 | $0 | $0 | $8,225 |
-| 24 | 969 | $12,573 | 9 | yes | $473 | $0 | $0 | $13,046 |
-| 25 | 978 | $13,773 | 10 | yes | $483 | $0 | $0 | $14,256 |
+| 1 | 756 | $4,060 | 7 |  | $300 | $0 | $0 | $4,360 |
+| 2 | 765 | $4,700 | 8 |  | $306 | $0 | $0 | $5,006 |
+| 3 | 775 | $8,042 | 7 | yes | $312 | $0 | $0 | $8,354 |
+| 4 | 784 | $4,864 | 8 |  | $318 | $0 | $0 | $5,182 |
+| 5 | 793 | $8,851 | 8 | yes | $325 | $0 | $0 | $9,176 |
+| 6 | 802 | $5,045 | 8 |  | $331 | $0 | $0 | $5,377 |
+| 7 | 812 | $9,350 | 8 | yes | $338 | $0 | $0 | $9,687 |
+| 8 | 821 | $5,591 | 9 |  | $345 | $0 | $0 | $5,935 |
+| 9 | 830 | $5,700 | 8 |  | $351 | $0 | $0 | $6,052 |
+| 10 | 839 | $9,704 | 8 | yes | $359 | $0 | $0 | $10,062 |
+| 11 | 849 | $6,311 | 9 |  | $366 | $0 | $0 | $6,676 |
+| 12 | 858 | $10,216 | 8 | yes | $373 | $0 | $0 | $10,589 |
+| 13 | 867 | $6,597 | 9 |  | $380 | $0 | $17,977 | $24,955 |
+| 14 | 876 | $11,121 | 9 | yes | $388 | $0 | $0 | $11,509 |
+| 15 | 886 | $6,912 | 9 |  | $396 | $0 | $0 | $7,308 |
+| 16 | 895 | $11,658 | 9 | yes | $404 | $0 | $43,661 | $55,722 |
+| 17 | 904 | $7,261 | 9 |  | $412 | $0 | $0 | $7,673 |
+| 18 | 913 | $12,201 | 9 | yes | $420 | $0 | $0 | $12,621 |
+| 19 | 923 | $7,647 | 9 |  | $428 | $0 | $0 | $8,075 |
+| 20 | 932 | $12,749 | 9 | yes | $437 | $0 | $0 | $13,186 |
+| 21 | 941 | $8,519 | 10 |  | $446 | $0 | $0 | $8,964 |
+| 22 | 950 | $13,303 | 9 | yes | $455 | $0 | $0 | $13,758 |
+| 23 | 960 | $9,011 | 10 |  | $464 | $0 | $0 | $9,474 |
+| 24 | 969 | $13,861 | 9 | yes | $473 | $0 | $0 | $14,334 |
+| 25 | 978 | $15,100 | 10 | yes | $483 | $0 | $0 | $15,583 |
 
 - Capital: **$155,438**
-- NPV of operating costs: **$152,870** ($266,125 nominal)
-- **Lifecycle cost (NPV): $308,308**
+- NPV of operating costs: **$166,650** ($289,620 nominal)
+- **Lifecycle cost (NPV): $322,087**
 
 Generator model: $2/kWh ÷ current efficiency, plus $0/kWh carbon-price add-on, $300 service every 100 kWh, efficiency × 0.98 per service, service count carried across years, and replacement ($3,500, assumption) once efficiency falls below 70 %. The carbon-price default is $0/kWh because BC eliminated its carbon tax and the federal consumer fuel charge ceased in 2025; it remains adjustable for a future charge or internal carbon value.
 
@@ -153,23 +153,23 @@ Generator model: $2/kWh ÷ current efficiency, plus $0/kWh carbon-price add-on, 
 
 | Strategy | Gen kWh P50 | Gen kWh P90 | Mean year-1 cost | P90 cost | Starts P50 |
 |---|---:|---:|---:|---:|---:|
-| Forecast-aware (recommended) | 768 kWh | 903 kWh | $3,582 | $4,318 | 28 |
-| SOC trigger (30 % → 90 %) | 995 kWh | 1,121 kWh | $4,660 | $5,355 | 19 |
+| Forecast-aware (recommended) | 768 kWh | 903 kWh | $4,288 | $5,018 | 28 |
+| SOC trigger (30 % → 90 %) | 995 kWh | 1,121 kWh | $5,129 | $5,855 | 19 |
 
-Forecast-aware dispatch saves **$1,078/yr (23 %)** on this design. It only charges the battery enough to reach the next forecast solar surplus, so generator energy doesn't displace sun that would otherwise be curtailed.
+Forecast-aware dispatch saves **$841/yr (16 %)** on this design. It only charges the battery enough to reach the next forecast solar surplus, so generator energy doesn't displace sun that would otherwise be curtailed.
 
 ## 5. Design alternatives (optimizer)
 
-Every panels × batteries mix is simulated in each of 20 weather years and costed over 25 years (lifecycle NPV). One year can flatter or punish a design, so designs are compared on the average year and on the worst year. These are the tiers on the app's Suggestions tab.
+Every panels × batteries mix is simulated in each of 20 weather years and costed over 25 years (lifecycle NPV). The stated objective is **minimax**: select the design with the lowest cost in the worst simulated year. Average cost is reported as context, not used to override that decision. These are the tiers on the app's Suggestions tab.
 
 | Tier | Rule | Panels | Batteries | Inverters | Capex | Gen kWh/yr (avg) | Lifecycle NPV, average | Lifecycle NPV, worst year |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| 1 · Essential | The lowest installed cost that meets every requirement. | 48 | 6 | 2 | $132,061 | 2410 | $515,539 | $541,433 |
-| **2 · Balanced (recommended)** | The lowest total cost in a bad weather year: installed plus running, in the worst of the simulated years. | 92 | 5 | 2 | $155,438 | 786 | $310,574 | $333,284 |
-| 3 · Independent | The least generator use within 2% of the lowest average total cost. | 120 | 7 | 3 | $199,705 | 317 | $303,288 | $333,800 |
-| 4 · Resilient | The least generator use of any design searched. | 120 | 16 | 3 | $267,906 | 84 | $380,081 | $415,031 |
+| 1 · Essential | The lowest installed cost that meets every requirement. | 48 | 6 | 2 | $132,061 | 2410 | $548,989 | $577,547 |
+| **2 · Balanced (recommended)** | The lowest total cost in a bad weather year: installed plus running, in the worst of the simulated years. | 120 | 7 | 3 | $199,705 | 317 | $310,034 | $343,074 |
+| 3 · Independent | The least generator use within 2% of the lowest worst-year total cost. | 120 | 8 | 3 | $207,283 | 272 | $315,304 | $347,378 |
+| 4 · Resilient | The least generator use of any design searched. | 120 | 16 | 3 | $267,906 | 84 | $382,371 | $420,759 |
 
-298 candidates simulated (264 meet every requirement in every year). Near the optimum the lifecycle-cost surface is flat. The cheapest design on average is 120 panels / 7 batteries / 3 inverters at $303,288. The recommended 92 / 5 / 2 averages 2.4 % more, but needs $44,267 less capital and 1 fewer inverter(s) and has the lowest worst-year cost of any design ($333,284 vs $333,800). The cheapest compliant build saves $23,377 up front but costs $204,965 more over its life on average, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
+298 candidates simulated (264 meet every requirement in every year). Near the optimum the lifecycle-cost surface is flat. The recommended design is also the cheapest on average. The cheapest compliant build saves $67,644 up front but costs $238,954 more over its life on average, because generator fuel and servicing (≈ $4.65+/kWh) cost far more than extra panels (≈ $0.80/W).
 
 ## 6. Context — the same load on BC Hydro
 

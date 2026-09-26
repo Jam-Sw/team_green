@@ -5,7 +5,8 @@
  * Simulates and costs every panel × battery mix, then picks the tiers. With
  * day-to-day weather each design is run in all WEATHER_YEARS simulated years
  * (SunEngine.evaluateYears), so no single lucky or unlucky year decides the
- * answer: designs are ranked on the average year and on the worst year.
+ * answer. The decision objective is minimax: lowest lifecycle cost in the
+ * worst simulated weather year. Average cost remains visible as context.
  *
  * In the browser it works in ~25 ms slices so the page stays responsive, and
  * one result is shared by the Optimizer and Suggestions tabs and the slider
@@ -17,7 +18,7 @@
  *   SunSearch.cached(settings) → result or null
  *   SunSearch.run(settings) → result (synchronous)
  *   SunSearch.tierOf(result, design) → the tier that is exactly this design, or null
- *   result: { settings, grid, rows, years, best, near, tiers: [{ n, id, name, rule, also, row }] }
+ *   result: { settings, grid, rows, years, best, averageBest, near, tiers: [{ n, id, name, rule, also, row }] }
  *   row: { panels, batteries, inverters, capex, genKwh, lifecycle (average), worstLifecycle, feasible }
  * ═══════════════════════════════════════════════════════════════════════════════
  */
@@ -43,7 +44,7 @@
       pick: function (ok) { return lowest(ok, function (r) { return r.capex; }); } },
     { id: 'balanced', name: 'Balanced', rule: 'The lowest total cost in a bad weather year: installed plus running, in the worst of the simulated years.',
       pick: function (ok) { return lowest(ok, function (r) { return r.worstLifecycle; }); } },
-    { id: 'independent', name: 'Independent', rule: 'The least generator use within 2% of the lowest average total cost.',
+    { id: 'independent', name: 'Independent', rule: 'The least generator use within 2% of the lowest worst-year total cost.',
       pick: function (ok, best, near) { return lowest(near, function (r) { return r.genKwh; }); } },
     { id: 'resilient', name: 'Resilient', rule: 'The least generator use of any design searched.',
       pick: function (ok) { return lowest(ok, function (r) { return r.genKwh; }); } }
@@ -132,8 +133,9 @@
 
   function finish(k, s, grid, rows, seeds) {
     var ok = rows.filter(function (r) { return r.feasible; });
-    var best = lowest(ok, function (r) { return r.lifecycle; });
-    var near = best ? ok.filter(function (r) { return r.lifecycle <= best.lifecycle * 1.02; }) : [];
+    var averageBest = lowest(ok, function (r) { return r.lifecycle; });
+    var best = lowest(ok, function (r) { return r.worstLifecycle; });
+    var near = best ? ok.filter(function (r) { return r.worstLifecycle <= best.worstLifecycle * 1.02; }) : [];
     var tiers = [];
     if (best) {
       TIERS.forEach(function (t) {
@@ -145,7 +147,7 @@
       });
     }
     return { key: k, settings: s, grid: grid, rows: rows, years: seeds ? seeds.length : 1,
-             best: best, near: near, tiers: tiers };
+             best: best, averageBest: averageBest, near: near, tiers: tiers };
   }
 
   /** The row with the smallest fn(row); ties go to the lower average lifetime cost. */

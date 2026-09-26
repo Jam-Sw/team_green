@@ -24,11 +24,13 @@ window.SunModel = (function () {
       return { season: se, solar: E.autonomy(d, se.id, 14, true), dark: E.autonomy(d, se.id, 14, false) };
     });
     var cap = B.capex(d);
-    var lifeKwh = E.lifecycleEnergy(d, sim.totals.gen);
+    // Keep generator starts with the lifetime kWh: start wear is a real
+    // operating cost, so the Budget and Optimizer must use the same dispatch.
+    var lifeDispatch = E.lifecycleDispatch(d, sim.totals);
     var m = {
       s: settings, d: d, sim: sim, T: sim.totals, autonomy: autonomy,
       target: autonomy.filter(function (a) { return a.season.id === d.autonomySeason; })[0],
-      cap: cap, life: B.lifecycle(d, lifeKwh, cap)
+      cap: cap, life: B.lifecycle(d, lifeDispatch.kwh, cap, lifeDispatch.starts)
     };
     m.checks = checks(m);
     m.failed = m.checks.filter(function (c) { return !c.ok; }).length;

@@ -204,32 +204,38 @@
    * Year-by-year operating costs and NPV.
    * `genKwh` is either one number (repeated every year) or an array by year.
    */
-  function lifecycle(d, genKwh, cap) {
+  function lifecycle(d, genKwh, cap, genStarts) {
     cap = cap || capex(d);
     var n = d.horizonYears;
     var kwh = Array.isArray(genKwh) ? genKwh : Array.apply(null, Array(n)).map(function () { return genKwh; });
-    var gen = E.generatorCostByYear(kwh, d);
+    var starts = Array.isArray(genStarts) ? genStarts : Array.apply(null, Array(n)).map(function () { return genStarts || 0; });
+    var gen = E.generatorCostByYear(kwh, d, starts);
     var r = d.discountPct / 100;
     var years = [];
-    var npvOpex = 0;
+    var npvOpex = 0, cumulativeNominal = cap.total, cumulativeNpv = cap.total;
+    var inverterBase = replacementCost(EQ.inverter.unitPrice, d.inverters, HOURS.inverter, d.electricianRate, false);
+    var batteryBase = replacementCost(EQ.battery.unitPrice, d.batteries, HOURS.battery, d.electricianRate, true);
     for (var y = 0; y < n; y++) {
       var esc = Math.pow(1 + d.escalationPct / 100, y);
       var row = {
         year: y + 1,
         genKwh: kwh[y],
         generator: gen[y].cost,
+        generatorStartWear: gen[y].startWear,
         genServices: gen[y].services,
         genReplacements: gen[y].replacements,
         om: d.omPerYear * esc,
         utility: 0,
-        inverters: y + 1 === d.inverterReplaceYear ?
-          replacementCost(EQ.inverter.unitPrice, d.inverters, HOURS.inverter, d.electricianRate, false) * esc : 0,
-        batteries: y + 1 === d.batteryReplaceYear ?
-          replacementCost(EQ.battery.unitPrice, d.batteries, HOURS.battery, d.electricianRate, true) * esc : 0
+        inverters: y + 1 === d.inverterReplaceYear ? inverterBase * esc : 0,
+        batteries: y + 1 === d.batteryReplaceYear ? batteryBase * esc : 0
       };
       row.total = row.generator + row.om + row.utility + row.inverters + row.batteries;
       row.discounted = row.total / Math.pow(1 + r, y + 1);
       npvOpex += row.discounted;
+      cumulativeNominal += row.total;
+      cumulativeNpv += row.discounted;
+      row.cumulativeNominal = cumulativeNominal;
+      row.cumulativeNpv = cumulativeNpv;
       years.push(row);
     }
     return {
@@ -238,14 +244,16 @@
       npvOpex: npvOpex,
       lifecycle: cap.total + npvOpex,
       annualOpex: years[0].total,
-      nominalOpex: years.reduce(function (a, y) { return a + y.total; }, 0)
+      nominalOpex: years.reduce(function (a, y) { return a + y.total; }, 0),
+      inverterReplacementBase: inverterBase,
+      batteryReplacementBase: batteryBase
     };
   }
 
   /** Cost function handed to the optimizer. */
-  function costFn(d, genKwh) {
+  function costFn(d, genKwh, genStarts) {
     var cap = capex(d);
-    var lc = lifecycle(d, genKwh, cap);
+    var lc = lifecycle(d, genKwh, cap, genStarts);
     return { capex: cap.total, lifecycle: lc.lifecycle, annualOpex: lc.annualOpex };
   }
 

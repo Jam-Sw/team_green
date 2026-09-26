@@ -23,8 +23,8 @@ const d = E.buildDesign(s);
 const sim = E.simulateSteadyYear(d, { keepHourly: false });
 const T = sim.totals;
 const cap = B.capex(d);
-const lifeKwh = E.lifecycleEnergy(d);
-const life = B.lifecycle(d, lifeKwh, cap);
+const lifeDispatch = E.lifecycleDispatch(d);
+const life = B.lifecycle(d, lifeDispatch.kwh, cap, lifeDispatch.starts);
 const sd = d.minimums.stringDesign;
 
 const money = (v) => '$' + Math.round(v).toLocaleString('en-CA');
@@ -55,7 +55,7 @@ const search = Search.run(s);
 const feas = search.rows.filter((r) => r.feasible);
 const tier = (id) => search.tiers.find((t) => t.id === id || t.also.includes(Search.TIERS.find((x) => x.id === id).rule));
 const rec = search.tiers.find((t) => t.recommended).row;
-const cheapestAvg = search.best;
+const cheapestAvg = search.averageBest;
 const minCap = tier('essential').row;
 
 // ── Document ────────────────────────────────────────────────────────────────
@@ -163,7 +163,7 @@ w(`Forecast-aware dispatch saves **${money(socS.costMean - smart.costMean)}/yr (
 w();
 w('## 5. Design alternatives (optimizer)');
 w();
-w(`Every panels × batteries mix is simulated in each of ${search.years} weather years and costed over ${d.horizonYears} years (lifecycle NPV). One year can flatter or punish a design, so designs are compared on the average year and on the worst year. These are the tiers on the app's Suggestions tab.`);
+w(`Every panels × batteries mix is simulated in each of ${search.years} weather years and costed over ${d.horizonYears} years (lifecycle NPV). The stated objective is **minimax**: select the design with the lowest cost in the worst simulated year. Average cost is reported as context, not used to override that decision. These are the tiers on the app's Suggestions tab.`);
 w();
 w('| Tier | Rule | Panels | Batteries | Inverters | Capex | Gen kWh/yr (avg) | Lifecycle NPV, average | Lifecycle NPV, worst year |');
 w('|---|---|---:|---:|---:|---:|---:|---:|---:|');

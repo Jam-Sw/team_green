@@ -105,10 +105,6 @@ test('suggestions: every tier passes, sets the sliders, and matches the budget',
   await expect(met).toBeVisible();
   for (const cell of await met.locator('td.num').all()) await expect(cell).toHaveText('11 / 11');
 
-  // The default design is a tier, marked on the sliders.
-  await expect(page.locator('#tiers .tier.on')).toContainText('In use');
-  await expect(page.locator('#ctl-panels ~ .ticks .tick.on')).toHaveCount(1);
-
   // Use tier 1: the sliders move to it and it becomes the design in use.
   const use = page.locator('#tiers .tier[data-tier="1"] button');
   const panels = await use.getAttribute('data-panels');
@@ -118,11 +114,12 @@ test('suggestions: every tier passes, sets the sliders, and matches the budget',
   await expect(page.locator('#ctl-panels')).toHaveValue(panels);
   await expect(page.locator('#ctl-batteries')).toHaveValue(batteries);
   await expect(page.locator('#tiers .tier[data-tier="1"]')).toContainText('In use');
+  await expect(page.locator('#ctl-panels ~ .ticks .tick.on')).toHaveCount(1);
   await expect(page.locator('#statusText')).toHaveText('All requirements met');
 
   // Its 25-year cost is the same number the Budget tab shows.
   await openTab(page, 'Budget');
-  await expect(page.locator('#budgetKpis .kpi').nth(2).locator('.kpi-value')).toHaveText(lifetime);
+  await expect(page.locator('#budgetKpis .kpi').nth(3).locator('.kpi-value')).toHaveText(lifetime);
 });
 
 test('a control change recomputes, persists across reload, and resets', async ({ page }) => {

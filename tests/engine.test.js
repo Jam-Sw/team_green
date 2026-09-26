@@ -247,6 +247,12 @@ TestRunner.suite('Generator accounting', function () {
     assert.approxEqual(SunEngine.runGenerator(g, 50, withCarbon), 50 * (1.65 + 0.20), 1e-9,
       'carbon add-on is included in generator operating cost');
   });
+
+  TestRunner.test('generator start wear is included in lifecycle operating cost', function (assert) {
+    var rows = SunEngine.generatorCostByYear([0], Object.assign({}, s, { escalationPct: 0, genStartWearCost: 25 }), [3]);
+    assert.approxEqual(rows[0].startWear, 75, 1e-9, 'three starts × $25');
+    assert.approxEqual(rows[0].cost, 75, 1e-9, 'start wear is not free when generator kWh is zero');
+  });
 });
 
 TestRunner.suite('Backup autonomy & automation', function () {

@@ -115,7 +115,8 @@ TestRunner.suite('Lifecycle & context', function () {
     var s = SunSettings.defaults();
     var row = SunEngine.evaluate(s, SunBudget.costFn, 92, 5);
     var d = SunEngine.buildDesign(s, { panels: 92, batteries: 5, inverters: 0 });
-    var lc = SunBudget.lifecycle(d, SunEngine.lifecycleEnergy(d));
+    var dispatch = SunEngine.lifecycleDispatch(d);
+    var lc = SunBudget.lifecycle(d, dispatch.kwh, undefined, dispatch.starts);
     assert.approxEqual(row.lifecycle, lc.lifecycle, 1e-6, 'same lifecycle cost, PV ageing included');
   });
 
@@ -135,7 +136,8 @@ TestRunner.suite('Budget-sensitive settings', function () {
     var d = budgetDesign(overrides);
     var sim = SunEngine.simulateSteadyYear(d);
     var cap = SunBudget.capex(d);
-    return { cap: cap, life: SunBudget.lifecycle(d, SunEngine.lifecycleEnergy(d, sim.totals.gen), cap), sim: sim };
+    var dispatch = SunEngine.lifecycleDispatch(d, sim.totals);
+    return { cap: cap, life: SunBudget.lifecycle(d, dispatch.kwh, cap, dispatch.starts), sim: sim };
   }
 
   TestRunner.test('generator fuel, service and replacement settings reach the 25-year total', function (assert) {
