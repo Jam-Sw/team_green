@@ -40,10 +40,17 @@ window.SunUI = (function () {
   // ── HTML builders ──────────────────────────────────────────────────────
   function $(id) { return document.getElementById(id); }
 
-  /** A headline number: label, value, one line of context. */
-  function kpi(label, value, sub) {
+  /** A headline number: label, value, optional visual (HTML), one line of context. */
+  function kpi(label, value, sub, extra) {
     return '<div class="kpi"><div class="kpi-label">' + label + '</div><div class="kpi-value">' + value + '</div>' +
-      (sub ? '<div class="kpi-sub">' + sub + '</div>' : '') + '</div>';
+      (extra || '') + (sub ? '<div class="kpi-sub">' + sub + '</div>' : '') + '</div>';
+  }
+
+  /** A bar filled to value/max with a tick at the target, e.g. backup days. */
+  function gauge(value, target, max, label) {
+    var pc = function (v) { return Math.max(0, Math.min(100, v / max * 100)).toFixed(1) + '%'; };
+    return '<div class="gauge" role="img" aria-label="' + esc(label) + '"><span style="width:' + pc(value) + '"></span>' +
+      '<i style="left:' + pc(target) + '"></i></div>';
   }
 
   /** One line under a card title saying how to read what follows. */
@@ -100,7 +107,7 @@ window.SunUI = (function () {
 
   return {
     money: money, kwh: kwh, pct: pct, n1: n1, esc: esc, sum: sum, span: span,
-    $: $, kpi: kpi, caption: caption, card: card, table: table, segmented: segmented,
+    $: $, kpi: kpi, gauge: gauge, caption: caption, card: card, table: table, segmented: segmented,
     tab: tab, tabs: tabs,
     COLORS: {
       solar: 'var(--c-solar)', battery: 'var(--c-battery)', gen: 'var(--c-gen)',

@@ -42,11 +42,14 @@
     render: function (m) {
       var d = m.d, T = m.T, t = m.target;
 
+      var backup = window.SunModel.days(t.solar);
       U.$('kpis').innerHTML =
-        U.kpi('Installed cost', U.money(m.cap.total), 'incl. GST and PST · $' + (m.cap.total / (d.pvKw * 1000)).toFixed(2) + ' per watt') +
-        U.kpi('Solar · storage', U.n1(d.pvKw) + ' kW · ' + Math.round(d.usableKwh) + ' kWh', d.panels + ' panels · ' + d.batteries + ' batteries, usable') +
-        U.kpi(t.season.name + ' backup', window.SunModel.days(t.solar) + ' days', 'battery only · target ' + d.autonomyDays + ' days') +
-        U.kpi('Generator', U.kwh(T.gen) + '/yr', 'solar covers ' + U.pct(T.solarFraction) + ' of the home');
+        U.kpi('Installed cost', U.money(m.cap.total), 'Including GST and PST, $' + (m.cap.total / (d.pvKw * 1000)).toFixed(2) + ' per watt') +
+        U.kpi('Solar', U.n1(d.pvKw) + ' kW', d.panels + ' panels') +
+        U.kpi('Storage', Math.round(d.usableKwh) + ' kWh', 'Usable, in ' + d.batteries + ' batteries') +
+        U.kpi(t.season.name + ' backup', backup + ' days', 'On battery alone. Target: ' + d.autonomyDays + ' days',
+          U.gauge(t.solar.capped ? 14 : t.solar.days, d.autonomyDays, 14, backup + ' days of backup against a ' + d.autonomyDays + '-day target')) +
+        U.kpi('Generator, per year', U.kwh(T.gen), 'Solar covers ' + U.pct(T.solarFraction) + ' of the home');
 
       U.$('designSummary').innerHTML = U.table(
         [{ t: 'Part', nowrap: true }, { t: 'Qty', num: true }, { t: 'Why this many' }],

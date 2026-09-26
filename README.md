@@ -71,6 +71,7 @@ settings ──► model ──► tabs
 | `ui/model.js`, `ui/controls.js`, `ui/sld.js` | Model, settings panel, single-line diagram |
 | `ui/tabs/*.js` | Overview, Energy, Generator, Optimizer, Budget, Assumptions |
 | `charts.js`, `styles.css`, `index.html` | SVG charts, styles (light + dark), page shell |
+| `fonts/` | Archivo, self-hosted so the page works offline (SIL OFL, see `fonts/OFL.txt`) |
 | `tests/` | `run-tests.js` (Node) and `index.html` (browser) |
 | `e2e/`, `playwright.config.js` | Browser tests against the Pages-style build |
 | `tools/report.js` | Generates the budget report from the engine |
