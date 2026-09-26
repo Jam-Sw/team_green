@@ -10,7 +10,13 @@ The architecture follows [`shubin123/drippage`](https://github.com/shubin123/dri
 python3 -m http.server 8000     # then open http://localhost:8000
 node tests/run-tests.js         # 52 tests: physics, datasheet rules, budget
 node tools/report.js            # regenerate docs/BUDGET_VICTORIA.md
+
+npm install && npx playwright install chromium
+npm run test:e2e                # build _site/, serve at /team_green/ like Pages, run 7 browser tests
+E2E_BASE_URL=https://jam-sw.github.io/team_green/ npm run test:e2e:live   # same tests on the live site
 ```
+
+`.github/workflows/pages.yml` runs the unit and e2e tests on every push and PR. On `main` it then deploys `_site/` to GitHub Pages and reruns the e2e suite against the live URL. The e2e suite fails on any console error, any broken request, and any request outside the `/team_green/` sub-path, so a root-absolute URL that works on localhost but 404s on Pages gets caught.
 
 ## Recommended design
 

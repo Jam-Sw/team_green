@@ -1,0 +1,123 @@
+// End-to-end checks of the planner as GitHub Pages serves it (see
+// playwright.config.js). Runs against a local sub-path server by default,
+// or a live deployment when E2E_BASE_URL is set.
+const { test, expect } = require('@playwright/test');
+
+// Fail on any console error, uncaught exception or broken request, and on any
+// same-origin request outside the project sub-path (a root-absolute URL works
+// on localhost:8000 but 404s on <owner>.github.io/<repo>/).
+test.beforeEach(async ({ page, baseURL }) => {
+  const base = new URL(baseURL);
+  const problems = [];
+  page.on('console', (m) => { if (m.type() === 'error') problems.push('console: ' + m.text()); });
+  page.on('pageerror', (e) => problems.push('pageerror: ' + e.message));
+  page.on('requestfailed', (r) => problems.push('failed: ' + r.url()));
+  page.on('response', (r) => { if (r.status() >= 400) problems.push(r.status() + ': ' + r.url()); });
+  page.on('request', (r) => {
+    const u = new URL(r.url());
+    if (u.origin === base.origin && !u.pathname.startsWith(base.pathname)) problems.push('outside base path: ' + r.url());
+  });
+  page.problems = problems;
+});
+
+test.afterEach(async ({ page }) => {
+  expect(page.problems, 'console errors / broken requests').toEqual([]);
+});
+
+async function openTab(page, name) {
+  await page.getByRole('tab', { name }).click();
+  await expect(page.locator('#tab-' + name.toLowerCase())).toHaveClass(/active/);
+}
+
+test('loads the recommended design with every requirement met', async ({ page }) => {
+  await page.goto('./');
+  await expect(page).toHaveTitle(/SunPage/);
+  await expect(page.locator('#statusText')).toHaveText('All requirements met');
+  await expect(page.locator('#statusBadge')).toHaveClass(/ok/);
+  await expect(page.locator('#kpis .kpi')).not.toHaveCount(0);
+  await expect(page.locator('#controlPanel details.ctl-group')).toHaveCount(6);
+  await expect(page.locator('#checklist li')).not.toHaveCount(0);
+  await expect(page.locator('#sld svg')).toBeVisible();
+  await expect(page.locator('#designSummary')).toContainText('FlexBOSS21');
+});
+
+test('every tab renders its content', async ({ page }) => {
+  await page.goto('./');
+
+  await openTab(page, 'Energy');
+  for (const id of ['dayChart', 'daySocChart', 'monthChart', 'socChart']) {
+    await expect(page.locator('#' + id + ' svg')).toBeVisible();
+  }
+  await expect(page.locator('#autonomyTable table')).toBeVisible();
+
+  await openTab(page, 'Generator');
+  await expect(page.locator('#automation')).not.toBeEmpty();
+  // The 20-year strategy comparison runs automatically on first visit.
+  await expect(page.locator('#compareOut table')).toBeVisible({ timeout: 60000 });
+  await expect(page.locator('#compareOut')).toContainText('Forecast-aware');
+  await expect(page.locator('#genYearChart svg')).toBeVisible();
+
+  await openTab(page, 'Budget');
+  await expect(page.locator('#budgetTable')).toContainText('Total installed cost');
+  await expect(page.locator('#lifeChart svg')).toBeVisible();
+  await expect(page.locator('#gridCompare')).toContainText('BC Hydro');
+
+  await openTab(page, 'Assumptions');
+  await expect(page.locator('#assumptions')).toContainText('Sources');
+});
+
+test('optimizer runs and a heatmap cell loads that design', async ({ page }) => {
+  await page.goto('./');
+  await openTab(page, 'Optimizer');
+  await expect(page.locator('#alternatives table')).toBeVisible({ timeout: 110000 });
+  await expect(page.locator('#optBtn')).toHaveText('Run again');
+
+  const pick = page.locator('#alternatives button[data-p]').first();
+  const panels = await pick.getAttribute('data-p');
+  await pick.click();
+  await expect(page.locator('#ctl-panels')).toHaveValue(panels);
+});
+
+test('a control change recomputes, persists across reload, and resets', async ({ page }) => {
+  await page.goto('./');
+  const total = page.locator('#kpis');
+  const before = await total.textContent();
+
+  await page.locator('#ctl-panels').fill('40');
+  await expect(page.locator('#val-panels')).toHaveText('40');
+  await expect(total).not.toHaveText(before);
+
+  await page.reload();
+  await expect(page.locator('#ctl-panels')).toHaveValue('40');
+
+  await page.locator('#resetBtn').click();
+  await expect(page.locator('#ctl-panels')).toHaveValue('92');
+  await expect(total).toHaveText(before);
+});
+
+test('hash deep-links open a tab', async ({ page }) => {
+  await page.goto('./#budget');
+  await expect(page.locator('#tab-budget')).toHaveClass(/active/);
+  await expect(page.locator('#budgetTable')).toContainText('Total installed cost');
+});
+
+test('budget exports as CSV', async ({ page }) => {
+  await page.goto('./#budget');
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#csvBtn').click()]);
+  expect(download.suggestedFilename()).toBe('victoria-offgrid-budget.csv');
+  const fs = require('fs');
+  const csv = fs.readFileSync(await download.path(), 'utf8');
+  expect(csv).toMatch(/^"Category","Item"/);
+  expect(csv).toContain('Total installed cost');
+});
+
+test('in-browser unit test page passes', async ({ page }) => {
+  await page.goto('./tests/index.html');
+  const results = await page.waitForFunction(() => {
+    const r = window.TestRunner && window.TestRunner.getResults();
+    return r && r.total > 0 ? { total: r.total, failed: r.failed } : null;
+  });
+  const r = await results.jsonValue();
+  expect(r.failed).toBe(0);
+  expect(r.total).toBeGreaterThan(40);
+});
