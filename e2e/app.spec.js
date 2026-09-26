@@ -78,16 +78,49 @@ test('every tab renders its content', async ({ page }) => {
   await expect(page.locator('#assumptions')).toContainText('Sources');
 });
 
-test('optimizer runs and a heatmap cell loads that design', async ({ page }) => {
+test('optimizer maps every design, and a square loads that design', async ({ page }) => {
   await page.goto('./');
   await openTab(page, 'Optimizer');
-  await expect(page.locator('#alternatives table')).toBeVisible({ timeout: 110000 });
-  await expect(page.locator('#optBtn')).toHaveText('Run again');
+  const cells = page.locator('#heatmap .cell[data-ok]');
+  await expect(cells.first()).toBeVisible({ timeout: 110000 });
+  await expect(page.locator('#heatmap .mark-label')).not.toHaveCount(0);
 
-  const pick = page.locator('#alternatives button[data-p]').first();
-  const panels = await pick.getAttribute('data-p');
+  const pick = cells.first();
+  const panels = await pick.getAttribute('data-col');
+  const batteries = await pick.getAttribute('data-row');
   await pick.click();
   await expect(page.locator('#ctl-panels')).toHaveValue(panels);
+  await expect(page.locator('#ctl-batteries')).toHaveValue(batteries);
+});
+
+test('suggestions: every tier passes, sets the sliders, and matches the budget', async ({ page }) => {
+  await page.goto('./#suggestions');
+  const tiers = page.locator('#tiers .tier');
+  await expect(tiers.first()).toBeVisible({ timeout: 110000 });
+  expect(await tiers.count()).toBeGreaterThanOrEqual(3);
+  // Every tier meets all the requirements.
+  const met = page.locator('#tierTable tr', { hasText: 'Requirements met' });
+  await expect(met).toBeVisible();
+  for (const cell of await met.locator('td.num').all()) await expect(cell).toHaveText('11 / 11');
+
+  // The default design is a tier, marked on the sliders.
+  await expect(page.locator('#tiers .tier.on')).toContainText('In use');
+  await expect(page.locator('#ctl-panels ~ .ticks .tick.on')).toHaveCount(1);
+
+  // Use tier 1: the sliders move to it and it becomes the design in use.
+  const use = page.locator('#tiers .tier[data-tier="1"] button');
+  const panels = await use.getAttribute('data-panels');
+  const batteries = await use.getAttribute('data-batteries');
+  const lifetime = (await page.locator('#tiers .tier[data-tier="1"] .tier-facts dd').first().textContent()).trim();
+  await use.click();
+  await expect(page.locator('#ctl-panels')).toHaveValue(panels);
+  await expect(page.locator('#ctl-batteries')).toHaveValue(batteries);
+  await expect(page.locator('#tiers .tier[data-tier="1"]')).toContainText('In use');
+  await expect(page.locator('#statusText')).toHaveText('All requirements met');
+
+  // Its 25-year cost is the same number the Budget tab shows.
+  await openTab(page, 'Budget');
+  await expect(page.locator('#budgetKpis .kpi').nth(2).locator('.kpi-value')).toHaveText(lifetime);
 });
 
 test('a control change recomputes, persists across reload, and resets', async ({ page }) => {
@@ -136,7 +169,7 @@ test('in-browser unit test page passes', async ({ page }) => {
 
 test('every tab explains itself: an intro, and a caption on every chart', async ({ page }) => {
   await page.goto('./');
-  for (const name of ['Overview', 'Energy', 'Generator', 'Optimizer', 'Budget', 'Assumptions']) {
+  for (const name of ['Overview', 'Suggestions', 'Energy', 'Generator', 'Optimizer', 'Budget', 'Assumptions']) {
     await page.getByRole('tab', { name }).click();
     const panel = page.locator('#tab-' + name.toLowerCase());
     await expect(panel.locator('.intro')).not.toBeEmpty();

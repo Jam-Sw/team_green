@@ -58,13 +58,13 @@ window.SunUI = (function () {
 
   /**
    * A table from column specs and rows.
-   * cols: [{ t: 'Header', num: true, nowrap: true }] · rows: [[cell, …]] · opts.rowClass(i)
+   * cols: [{ t: 'Header', num: true, nowrap: true, cls: 'on' }] · rows: [[cell, …]] · opts.rowClass(i)
    */
   function table(cols, rows, opts) {
     opts = opts || {};
     function cls(c) {
-      var k = (c && c.num ? 'num ' : '') + (c && c.nowrap ? 'nowrap' : '');
-      return k.trim() ? ' class="' + k.trim() + '"' : '';
+      var k = c ? [c.num ? 'num' : '', c.nowrap ? 'nowrap' : '', c.cls || ''].join(' ').trim() : '';
+      return k ? ' class="' + k + '"' : '';
     }
     return '<div class="table-scroll"><table><thead><tr>' +
       cols.map(function (c) { return '<th' + cls(c) + '>' + c.t + '</th>'; }).join('') +

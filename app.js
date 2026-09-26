@@ -9,15 +9,16 @@
  *   3. tabs      — each ui/tabs/*.js renders one view of the model
  *
  * This file only wires those together: it builds the tab bar from the tab
- * registry, keeps the URL hash in sync with the open tab, and recomputes the
- * model when a setting changes.
+ * registry, keeps the URL hash in sync with the open tab, recomputes the
+ * model when a setting changes, and runs the design search (ui/search.js)
+ * in the background so the tiers can be marked on the sliders.
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
 (function () {
   'use strict';
 
-  var S = window.SunSettings, U = window.SunUI;
+  var S = window.SunSettings, U = window.SunUI, E = window.SunEngine, Search = window.SunSearch;
   var settings = S.load();
   var model = null;
   var active = null;
@@ -25,10 +26,11 @@
   // Actions a tab may call.
   var app = {
     model: function () { return model; },
+    // Set the design counts (inverters at the minimum that design needs).
     loadDesign: function (panels, batteries) {
       settings.panels = panels;
       settings.batteries = batteries;
-      settings.inverters = 1;
+      settings.inverters = E.minimums(panels, settings).inverters;
       S.save(settings);
       renderControls();
       recompute();
@@ -51,6 +53,27 @@
     window.SunControls.refresh(settings, model.d);
     renderStatus();
     renderTab(active);
+    renderMarks();
+    searchSoon();
+  }
+
+  // ── Tiers on the sliders ──────────────────────────────────────────────
+  var searchTimer = null;
+  function searchSoon() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () { Search.request(settings, 'app', { done: renderMarks }); }, 800);
+  }
+
+  /** Number each tier under the panel and battery sliders; fill the one in use. */
+  function renderMarks() {
+    var r = Search.cached(settings), inUse = Search.tierOf(r, model.d);
+    var marks = { panels: [], batteries: [] };
+    (r ? r.tiers : []).forEach(function (t) {
+      var title = 'Tier ' + t.n + ' · ' + t.name + ': ';
+      marks.panels.push({ v: t.row.panels, label: t.n, title: title + t.row.panels + ' panels', on: t === inUse });
+      marks.batteries.push({ v: t.row.batteries, label: t.n, title: title + t.row.batteries + ' batteries', on: t === inUse });
+    });
+    window.SunControls.setMarks(marks);
   }
 
   function renderStatus() {
@@ -142,6 +165,7 @@
     window.SunControls.refresh(settings, model.d);
     renderStatus();
     route();
+    searchSoon();
   }
 
   document.addEventListener('DOMContentLoaded', init);

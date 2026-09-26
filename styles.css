@@ -121,6 +121,15 @@ button { font: inherit; cursor: pointer; }
 .ctl-label output.adjusted { color: var(--warn); }
 .ctl input[type=range] { width: 100%; accent-color: var(--accent); margin-top: 4px; }
 .ctl-hint { font-size: .74rem; color: var(--text-3); }
+/* Tier markers under a slider (ui/controls.js setMarks) */
+.ticks { position: relative; height: 16px; margin: 2px 8px 0; }
+.tick {
+  position: absolute; top: 0; transform: translateX(-50%);
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+  background: var(--sunken); color: var(--text-3); cursor: default;
+  font-size: .68rem; font-weight: 700; line-height: 16px; text-align: center; white-space: nowrap;
+}
+.tick.on { background: var(--accent); color: var(--surface); }
 .switch { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--text-2); cursor: pointer; }
 .switch input { accent-color: var(--accent); }
 
@@ -189,6 +198,29 @@ details.more[open] > summary::after { content: "Hide"; }
 .kpi-value { font-size: 1.5rem; font-weight: 650; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 .kpi-sub { font-size: .76rem; color: var(--text-3); }
 
+/* Suggestions tab: one card per tier */
+.tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tier {
+  display: flex; flex-direction: column; gap: 6px; padding: 16px 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.tier.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.tier-head { display: flex; justify-content: space-between; align-items: center; min-height: 22px; }
+.tier-n { font-size: .72rem; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; }
+.tier h3 { font-size: 1.05rem; font-weight: 650; }
+.tier-rule { color: var(--text-2); font-size: .84rem; text-wrap: pretty; }
+.tier-price { font-size: 1.5rem; font-weight: 650; letter-spacing: -.01em; font-variant-numeric: tabular-nums; margin-top: auto; padding-top: 6px; }
+.tier-price span { font-size: .8rem; font-weight: 400; color: var(--text-3); letter-spacing: 0; }
+.tier-facts { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: .84rem; border-top: 1px solid var(--line); padding-top: 8px; }
+.tier-facts dt { color: var(--text-3); }
+.tier-facts dd { text-align: right; font-variant-numeric: tabular-nums; }
+.tier-parts { font-size: .82rem; color: var(--text-2); }
+.tier .btn { align-self: flex-start; margin-top: 4px; }
+.tier-inuse { color: var(--accent); font-weight: 600; font-size: .85rem; padding: 6px 0 0; }
+.searching { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.searching .muted { margin: 0; }
+td.on, th.on { background: var(--accent-soft); }
+
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .step { background: var(--sunken); border-radius: 8px; padding: 12px 14px; font-size: .86rem; color: var(--text-2); }
 .step h4 { margin: 4px 0 6px !important; color: var(--text) !important; font-size: .88rem !important; }
@@ -233,6 +265,10 @@ tr.best td { background: var(--accent-soft); }
 .chart .cell { cursor: pointer; }
 .chart .cell:hover { stroke: var(--text); stroke-width: 1; }
 .chart .cell.best { stroke: var(--accent); stroke-width: 2.5; }
+.chart .mark-label {
+  fill: #fff; font-size: 10px; font-weight: 700; pointer-events: none;
+  paint-order: stroke; stroke: rgba(0, 0, 0, .5); stroke-width: 2.5px;
+}
 .chart .overlay-line { stroke-linejoin: round; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: .78rem; color: var(--text-2); }
 .legend-item { display: inline-flex; align-items: center; gap: 6px; }

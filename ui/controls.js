@@ -7,6 +7,7 @@
  *
  *   SunControls.render(panel, settings, onChange(key, value))
  *   SunControls.refresh(settings, design)   // update the value read-outs
+ *   SunControls.setMarks({ key: [{ v, label, title, on }] })  // tier markers under sliders
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -14,6 +15,7 @@ window.SunControls = (function () {
   'use strict';
 
   var S = window.SunSettings, U = window.SunUI;
+  var marks = {};
 
   function render(panel, settings, onChange) {
     panel.innerHTML = '';
@@ -27,6 +29,34 @@ window.SunControls = (function () {
       });
       panel.appendChild(group);
     });
+    S.SCHEMA.forEach(drawMarks);
+  }
+
+  /** Replace the markers under the sliders (e.g. where each tier sits). */
+  function setMarks(next) {
+    marks = next || {};
+    S.SCHEMA.forEach(drawMarks);
+  }
+
+  function drawMarks(f) {
+    var input = U.$('ctl-' + f.key);
+    if (!input || f.type !== 'range') return;
+    var box = input.parentNode.querySelector('.ticks');
+    var list = marks[f.key] || [];
+    if (!list.length) { if (box) box.remove(); return; }
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'ticks';
+      input.insertAdjacentElement('afterend', box);
+    }
+    // Markers at the same value share one label ("3 4").
+    var at = {};
+    list.forEach(function (m) { (at[m.v] = at[m.v] || []).push(m); });
+    box.innerHTML = Object.keys(at).map(function (v) {
+      var ms = at[v], on = ms.some(function (m) { return m.on; });
+      return '<span class="tick' + (on ? ' on' : '') + '" style="left:' + ((v - f.min) / (f.max - f.min) * 100) + '%" title="' +
+        ms.map(function (m) { return m.title; }).join('; ') + '">' + ms.map(function (m) { return m.label; }).join(' ') + '</span>';
+    }).join('');
   }
 
   function field(f, v, onChange) {
@@ -77,5 +107,5 @@ window.SunControls = (function () {
     });
   }
 
-  return { render: render, refresh: refresh };
+  return { render: render, refresh: refresh, setMarks: setMarks };
 })();
